@@ -17,6 +17,7 @@ import { getMedicationById, deleteMedication } from '../db/medications';
 import { getCourseByMedicationId, updateCourseStatus } from '../db/courses';
 import { useScanFlowStore } from '../store/scanFlowStore';
 import { useIntakesStore } from '../store/intakesStore';
+import { cancelNotificationsForMedication } from '../services/notifications';
 import { getIntakeStatsByCourse, getRecentIntakesByCourse } from '../db/intakes';
 import type { Medication } from '../db/medications';
 import type { Course } from '../db/courses';
@@ -169,6 +170,7 @@ export default function MedicationDetailsScreen() {
           <TouchableOpacity
             style={[s.actionBtn, { backgroundColor: colors.cardAlt, borderWidth: 1, borderColor: colors.border }]}
             onPress={async () => {
+              await cancelNotificationsForMedication(medication.id);
               if (course) await updateCourseStatus(course.id, 'completed');
               resetScan();
               setScanField('medicationName', medication.name);
@@ -193,6 +195,7 @@ export default function MedicationDetailsScreen() {
                     text: 'Удалить',
                     style: 'destructive',
                     onPress: async () => {
+                      await cancelNotificationsForMedication(medication.id);
                       await deleteMedication(medication.id);
                       await loadToday();
                       navigation.goBack();

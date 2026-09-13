@@ -3,6 +3,7 @@ import * as Device from 'expo-device';
 import { Platform } from 'react-native';
 import type { IntakeEvent } from '../db/intakes';
 import { markIntakeEvent } from '../db/intakes';
+import { getDb } from '../db/client';
 
 const CATEGORY_ID = 'intake_reminder';
 const MAX_SCHEDULED = 60;
@@ -75,6 +76,24 @@ export async function cancelCourseNotifications(courseId: string, eventIds: stri
     await Notifications.cancelScheduledNotificationAsync(id);
   }
   await Notifications.cancelScheduledNotificationAsync(`low_supply_${courseId}`);
+}
+
+export async function cancelNotificationsForMedication(medicationId: string): Promise<void> {
+  const db = await getDb();
+  const rows = await db.getAllAsync<{ id: string; course_id: string }>(
+    `SELECT ie.id, ie.course_id
+     FROM intake_events ie
+     JOIN courses c ON ie.course_id = c.id
+     WHERE c.medication_id = ?`,
+    [medicationId],
+  );
+  for (const row of rows) {
+    await Notifications.cancelScheduledNotificationAsync(row.id);
+  }
+  const courseIds = [...new Set(rows.map((r) => r.course_id))];
+  for (const cId of courseIds) {
+    await Notifications.cancelScheduledNotificationAsync(`low_supply_${cId}`);
+  }
 }
 
 export function handleNotificationResponse(
