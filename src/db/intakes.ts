@@ -24,11 +24,9 @@ export async function insertIntakeEvents(events: IntakeEvent[]): Promise<void> {
 
 export async function getIntakesForDate(dateIso: string): Promise<IntakeEvent[]> {
   const db = await getDb();
-  const dayStart = dateIso + 'T00:00:00.000Z';
-  const dayEnd = dateIso + 'T23:59:59.999Z';
   return db.getAllAsync<IntakeEvent>(
-    `SELECT * FROM intake_events WHERE scheduled_at >= ? AND scheduled_at <= ? ORDER BY scheduled_at`,
-    [dayStart, dayEnd],
+    `SELECT * FROM intake_events WHERE scheduled_at LIKE ? ORDER BY scheduled_at`,
+    [`${dateIso}%`],
   );
 }
 

@@ -17,7 +17,10 @@
     "zustand": "^5.0.15"
   },
   "devDependencies": {
+    "@types/jest": "^30.0.0",
     "@types/react": "~19.2.2",
+    "jest": "^30.5.1",
+    "ts-jest": "^29.4.12",
     "typescript": "~6.0.3"
   },
   "scripts": {
@@ -30,8 +33,12 @@
   "jest": {
     "preset": "ts-jest",
     "testEnvironment": "node",
-    "testPathPattern": "__tests__",
-    "moduleFileExtensions": ["ts", "tsx", "js"]
+    "testMatch": ["**/__tests__/**/*.test.ts"],
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js"
+    ]
   },
   "private": true
 }

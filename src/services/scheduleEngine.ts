@@ -38,13 +38,10 @@ export function calculateCourse(input: ScheduleInput): ScheduleResult {
     const dateStr = date.toISOString().split('T')[0];
 
     for (const time of times) {
-      const [hours, minutes] = time.split(':').map(Number);
-      const scheduled = new Date(date);
-      scheduled.setHours(hours, minutes, 0, 0);
-
+      const scheduledAt = `${dateStr}T${time}:00.000`;
       events.push({
         course_id: courseId,
-        scheduled_at: scheduled.toISOString(),
+        scheduled_at: scheduledAt,
         status: 'pending',
         marked_at: null,
       });
