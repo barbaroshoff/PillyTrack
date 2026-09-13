@@ -2,6 +2,7 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import TabNavigator from './TabNavigator';
+import PaywallScreen from '../screens/PaywallScreen';
 import ScanCameraScreen from '../screens/scan/ScanCameraScreen';
 import ScanConfirmScreen from '../screens/scan/ScanConfirmScreen';
 import ScanScheduleScreen from '../screens/scan/ScanScheduleScreen';
@@ -13,6 +14,7 @@ import type { MedicationInfo } from '../services/medicationAI';
 
 export type RootStackParamList = {
   Tabs: undefined;
+  Paywall: undefined;
   ScanCamera: undefined;
   ScanConfirm: { barcode?: string };
   MedicationInfo: { info: MedicationInfo; photoUri: string };
@@ -29,6 +31,7 @@ export default function RootNavigator() {
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Tabs" component={TabNavigator} />
+        <Stack.Screen name="Paywall" component={PaywallScreen} />
         <Stack.Group screenOptions={{ presentation: 'modal' }}>
           <Stack.Screen name="ScanCamera" component={ScanCameraScreen} />
           <Stack.Screen name="ScanConfirm" component={ScanConfirmScreen} />

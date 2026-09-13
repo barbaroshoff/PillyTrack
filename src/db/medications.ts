@@ -26,6 +26,12 @@ export async function getMedicationById(id: string): Promise<Medication | null> 
   return db.getFirstAsync<Medication>('SELECT * FROM medications WHERE id = ?', [id]);
 }
 
+export async function getMedicationsCount(): Promise<number> {
+  const db = await getDb();
+  const row = await db.getFirstAsync<{ cnt: number }>('SELECT COUNT(*) as cnt FROM medications');
+  return row?.cnt ?? 0;
+}
+
 export async function deleteMedication(id: string): Promise<void> {
   const db = await getDb();
   await db.runAsync(

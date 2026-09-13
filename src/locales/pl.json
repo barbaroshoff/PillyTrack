@@ -146,5 +146,24 @@
   "wd_thu": "Cz",
   "wd_fri": "Pt",
   "wd_sat": "So",
-  "wd_sun": "Nd"
+  "wd_sun": "Nd",
+
+  "paywall_title": "PillyTrack Premium",
+  "paywall_subtitle": "Monitoruj zdrowie bez ograniczeń",
+  "paywall_free_label": "Bezpłatnie",
+  "paywall_premium_label": "Premium",
+  "paywall_feature_courses_free": "do 2 kursów",
+  "paywall_feature_courses_pro": "bez ograniczeń",
+  "paywall_feature_meds_free": "do 10 leków",
+  "paywall_feature_meds_pro": "bez ograniczeń",
+  "paywall_feature_notifs": "Przypomnienia o dawkach",
+  "paywall_feature_calendar": "Kalendarz dawek",
+  "paywall_price": "$1,99 / miesiąc",
+  "paywall_btn": "Subskrybuj",
+  "paywall_restore": "Przywróć zakupy",
+  "paywall_later": "Może później",
+  "paywall_success": "Subskrypcja aktywowana!",
+  "paywall_error": "Nie udało się dokonać zakupu. Spróbuj ponownie.",
+  "paywall_limit_courses": "Masz już 2 aktywne kursy. Subskrybuj, aby dodać więcej.",
+  "paywall_limit_meds": "Dodałeś 10 leków. Subskrybuj, aby kontynuować."
 }

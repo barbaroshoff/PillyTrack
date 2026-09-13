@@ -146,5 +146,24 @@
   "wd_thu": "Чт",
   "wd_fri": "Пт",
   "wd_sat": "Сб",
-  "wd_sun": "Вс"
+  "wd_sun": "Вс",
+
+  "paywall_title": "PillyTrack Premium",
+  "paywall_subtitle": "Следите за здоровьем без ограничений",
+  "paywall_free_label": "Бесплатно",
+  "paywall_premium_label": "Premium",
+  "paywall_feature_courses_free": "до 2 курсов",
+  "paywall_feature_courses_pro": "неограниченно",
+  "paywall_feature_meds_free": "до 10 препаратов",
+  "paywall_feature_meds_pro": "неограниченно",
+  "paywall_feature_notifs": "Уведомления о приёме",
+  "paywall_feature_calendar": "Календарь приёмов",
+  "paywall_price": "$1.99 / месяц",
+  "paywall_btn": "Оформить подписку",
+  "paywall_restore": "Восстановить покупки",
+  "paywall_later": "Позже",
+  "paywall_success": "Подписка оформлена!",
+  "paywall_error": "Не удалось оформить подписку. Попробуйте ещё раз.",
+  "paywall_limit_courses": "У вас уже 2 активных курса. Оформите подписку чтобы добавлять больше.",
+  "paywall_limit_meds": "Вы добавили 10 препаратов. Оформите подписку чтобы продолжить."
 }

@@ -146,5 +146,24 @@
   "wd_thu": "Do",
   "wd_fri": "Fr",
   "wd_sat": "Sa",
-  "wd_sun": "So"
+  "wd_sun": "So",
+
+  "paywall_title": "PillyTrack Premium",
+  "paywall_subtitle": "Verfolge deine Gesundheit ohne Grenzen",
+  "paywall_free_label": "Kostenlos",
+  "paywall_premium_label": "Premium",
+  "paywall_feature_courses_free": "bis zu 2 Kurse",
+  "paywall_feature_courses_pro": "unbegrenzt",
+  "paywall_feature_meds_free": "bis zu 10 Medikamente",
+  "paywall_feature_meds_pro": "unbegrenzt",
+  "paywall_feature_notifs": "Einnahmeerinnerungen",
+  "paywall_feature_calendar": "Einnahmekalender",
+  "paywall_price": "$1,99 / Monat",
+  "paywall_btn": "Abonnieren",
+  "paywall_restore": "Käufe wiederherstellen",
+  "paywall_later": "Vielleicht später",
+  "paywall_success": "Abonnement aktiviert!",
+  "paywall_error": "Kauf fehlgeschlagen. Bitte versuche es erneut.",
+  "paywall_limit_courses": "Du hast 2 aktive Kurse. Abonniere für mehr.",
+  "paywall_limit_meds": "Du hast 10 Medikamente hinzugefügt. Abonniere um fortzufahren."
 }

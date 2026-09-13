@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { AppState } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import { ThemeProvider } from './src/context/ThemeContext';
+import { SubscriptionProvider } from './src/context/SubscriptionContext';
 import RootNavigator from './src/navigation/RootNavigator';
 import { useIntakesStore } from './src/store/intakesStore';
 import { initI18n } from './src/i18n';
@@ -68,7 +69,9 @@ function AppInit() {
 export default function App() {
   return (
     <ThemeProvider>
-      <AppInit />
+      <SubscriptionProvider>
+        <AppInit />
+      </SubscriptionProvider>
     </ThemeProvider>
   );
 }

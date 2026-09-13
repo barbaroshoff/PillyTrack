@@ -12,6 +12,7 @@ import SettingsScreen from '../screens/SettingsScreen';
 import { useTheme } from '../context/ThemeContext';
 import { useFontScale } from '../context/FontScaleContext';
 import { baseSizes } from '../theme/typography';
+import { useSubscription } from '../context/SubscriptionContext';
 import type { RootStackParamList } from './RootNavigator';
 
 export type TabParamList = {
@@ -42,12 +43,22 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const { scale } = useFontScale();
   const { t } = useTranslation();
   const rootNav = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const { checkLimits } = useSubscription();
+
+  const handleScanPress = async () => {
+    const { allowed } = await checkLimits();
+    if (!allowed) {
+      rootNav.navigate('Paywall');
+      return;
+    }
+    rootNav.navigate('ScanCamera');
+  };
 
   return (
     <View style={{ backgroundColor: colors.bg, borderTopWidth: 1, borderTopColor: colors.border }}>
       <TouchableOpacity
         style={[s.scanBtn, { backgroundColor: colors.accent }]}
-        onPress={() => rootNav.navigate('ScanCamera')}
+        onPress={handleScanPress}
         activeOpacity={0.85}
       >
         <Text style={[s.scanBtnText, { fontSize: baseSizes.button * scale }]}>

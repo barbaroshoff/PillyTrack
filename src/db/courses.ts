@@ -86,6 +86,14 @@ export async function completeCourseIfDone(courseId: string): Promise<void> {
   }
 }
 
+export async function getActiveCoursesCount(): Promise<number> {
+  const db = await getDb();
+  const row = await db.getFirstAsync<{ cnt: number }>(
+    "SELECT COUNT(*) as cnt FROM courses WHERE status = 'active'",
+  );
+  return row?.cnt ?? 0;
+}
+
 export async function getCourseById(id: string): Promise<Course | null> {
   const db = await getDb();
   const row = await db.getFirstAsync<any>('SELECT * FROM courses WHERE id = ?', [id]);
