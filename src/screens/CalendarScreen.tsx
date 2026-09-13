@@ -60,23 +60,19 @@ function buildMarkedDates(
       borderColor = colors.border;
     }
 
-    if (date === selectedDate) {
-      bg = colors.accent;
-      borderColor = colors.accent;
-      textColor = '#fff';
-    }
+    const isSelected = date === selectedDate;
 
     marked[date] = {
       customStyles: {
         container: {
           backgroundColor: bg,
-          borderWidth: 1.5,
-          borderColor,
+          borderWidth: isSelected ? 2.5 : 1.5,
+          borderColor: isSelected ? colors.accent : borderColor,
           borderRadius: 18,
         },
         text: {
           color: textColor,
-          fontWeight: (allTaken || date === selectedDate) ? '700' : '400',
+          fontWeight: (allTaken || isSelected) ? '700' : '400',
         },
       },
     };
@@ -88,7 +84,7 @@ function buildMarkedDates(
       customStyles: {
         container: {
           backgroundColor: colors.accent,
-          borderWidth: 1.5,
+          borderWidth: 2.5,
           borderColor: colors.accent,
           borderRadius: 18,
         },
@@ -177,7 +173,28 @@ export default function CalendarScreen() {
           textMonthFontSize: baseSizes.title * scale,
           textDayFontSize: baseSizes.body * scale,
           textDayHeaderFontSize: baseSizes.caption * scale,
-        }}
+          // увеличиваем высоту строк чтобы занять весь экран
+          'stylesheet.calendar.main': {
+            week: {
+              marginTop: 6,
+              marginBottom: 6,
+              flexDirection: 'row',
+              justifyContent: 'space-around',
+            },
+          },
+          'stylesheet.day.basic': {
+            base: {
+              width: 44,
+              height: 44,
+              alignItems: 'center',
+              justifyContent: 'center',
+            },
+            text: {
+              marginTop: 0,
+              fontSize: baseSizes.body * scale,
+            },
+          },
+        } as any}
       />
 
       {/* Легенда */}
