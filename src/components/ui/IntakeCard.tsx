@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import { useFontScale } from '../../context/FontScaleContext';
 import { baseSizes } from '../../theme/typography';
@@ -12,21 +13,29 @@ interface Props {
   onDelete: () => void;
 }
 
-const STATUS_CONFIG = {
-  pending: { bg: 'warningLight', border: 'warning', label: 'Ожидает', labelColor: 'warning' },
-  taken: { bg: 'successLight', border: 'success', label: 'Принято', labelColor: 'success' },
-  missed: { bg: 'dangerLight', border: 'danger', label: 'Пропущено', labelColor: 'danger' },
+const STATUS_COLORS = {
+  pending: { bg: 'warningLight', border: 'warning', labelColor: 'warning' },
+  taken: { bg: 'successLight', border: 'success', labelColor: 'success' },
+  missed: { bg: 'dangerLight', border: 'danger', labelColor: 'danger' },
 } as const;
 
 export default function IntakeCard({ intake, onTaken, onSkipped, onDelete }: Props) {
   const { colors } = useTheme();
   const { scale } = useFontScale();
-  const cfg = STATUS_CONFIG[intake.status];
+  const { t } = useTranslation();
+  const cfg = STATUS_COLORS[intake.status];
 
-  const time = new Date(intake.scheduled_at).toLocaleTimeString('ru-RU', {
+  const time = new Date(intake.scheduled_at).toLocaleTimeString([], {
     hour: '2-digit',
     minute: '2-digit',
   });
+
+  const statusLabel =
+    intake.status === 'taken'
+      ? t('status_taken')
+      : intake.status === 'missed'
+      ? t('status_missed')
+      : t('status_pending');
 
   const cardBg = colors[cfg.bg as keyof typeof colors] as string;
   const borderColor = intake.status === 'missed'
@@ -71,16 +80,16 @@ export default function IntakeCard({ intake, onTaken, onSkipped, onDelete }: Pro
               fontWeight: '600',
             }}
           >
-            {cfg.label}
+            {statusLabel}
           </Text>
         </View>
 
         <TouchableOpacity
           style={s.deleteBtn}
           onPress={() =>
-            Alert.alert('Удалить запись?', 'Приём будет удалён из расписания.', [
-              { text: 'Отмена', style: 'cancel' },
-              { text: 'Удалить', style: 'destructive', onPress: onDelete },
+            Alert.alert(t('intake_delete_title'), t('intake_delete_body'), [
+              { text: t('cancel'), style: 'cancel' },
+              { text: t('delete'), style: 'destructive', onPress: onDelete },
             ])
           }
         >
@@ -94,14 +103,14 @@ export default function IntakeCard({ intake, onTaken, onSkipped, onDelete }: Pro
             style={[s.actionBtn, { backgroundColor: colors.success }]}
             onPress={onTaken}
           >
-            <Text style={[s.actionText, { fontSize: baseSizes.button * scale }]}>Принял</Text>
+            <Text style={[s.actionText, { fontSize: baseSizes.button * scale }]}>{t('taken')}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[s.actionBtn, { backgroundColor: colors.dangerLight, borderWidth: 1, borderColor: colors.danger }]}
             onPress={onSkipped}
           >
             <Text style={[s.actionText, { color: colors.danger, fontSize: baseSizes.button * scale }]}>
-              Пропустил
+              {t('skipped')}
             </Text>
           </TouchableOpacity>
         </View>

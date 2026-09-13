@@ -86,10 +86,47 @@
   "renew_btn": "Rinnova",
   "renew_error": "Rinnovo fallito",
 
-  "notif_title": "Ora di prendere {{name}}",
-  "notif_body": "Non dimenticare il tuo farmaco",
+  "notif_title": "💊 Ora di prendere {{name}}",
+  "notif_body": "Tocca 'Preso' per segnare come assunto",
   "notif_action_taken": "Sì, preso",
   "notif_action_missed": "Salta",
-  "notif_low_title": "Poche compresse rimaste",
-  "notif_low_body": "{{name}}: ancora circa {{days}} giorni. È ora di riacquistare."
+  "notif_low_title": "📦 Poche compresse rimaste",
+  "notif_low_body": "{{name}}: ancora circa {{days}} giorni. È ora di riacquistare.",
+  "notif_reminder_title": "⏰ {{name}} — non ancora preso",
+  "notif_reminder_body": "Promemoria: {{mins}} min fa era l'ora",
+
+  "scan_btn": "📷  Fotografa il farmaco",
+  "scan_photo_title": "Scatta foto",
+  "scan_processing": "Riconoscimento in corso...",
+  "scan_hint_auto": "Punta sulla confezione — la foto viene scattata automaticamente",
+  "scan_error_title": "Riconoscimento fallito",
+  "scan_error_body": "Riprova o inserisci manualmente",
+
+  "med_found": "Farmaco trovato",
+  "med_edit_hint": "Tocca il nome per modificare",
+  "med_info_description": "DESCRIZIONE",
+  "med_info_dosage": "💊 DOSAGGIO",
+  "med_info_contraindications": "⚠️ CONTROINDICAZIONI",
+  "med_info_side_effects": "ℹ️ EFFETTI COLLATERALI",
+  "med_info_disclaimer": "⚠️ Informazioni fornite dall'AI e potrebbero contenere imprecisioni. Segui sempre le istruzioni del medico.",
+  "med_info_setup": "Configura orario →",
+  "med_name_empty_title": "Inserisci il nome",
+  "med_name_empty_body": "Il nome del farmaco non può essere vuoto",
+
+  "delete": "Elimina",
+  "details_delete_title": "Eliminare il farmaco?",
+  "details_delete_body": "Tutti i cicli e la cronologia delle assunzioni verranno eliminati. Questa azione è irreversibile.",
+  "course_summary": "{{n}}× al giorno · {{days}} giorni",
+  "course_summary_times": "{{n}}× al giorno · {{times}}",
+
+  "intake_delete_title": "Eliminare voce?",
+  "intake_delete_body": "Questa assunzione verrà rimossa dall'orario.",
+
+  "disclaimer_title": "Benvenuto in PillyTrack",
+  "disclaimer_subtitle": "PillyTrack ti aiuta a seguire il tuo programma di farmaci e ti ricorda in tempo.",
+  "disclaimer_warning_title": "⚠️ Importante",
+  "disclaimer_warning_body1": "PillyTrack non è un'applicazione medica e non fornisce consulenza medica. È destinata solo a tenere traccia comodamente delle prescrizioni del medico.",
+  "disclaimer_warning_body2": "Segui sempre le istruzioni del tuo medico o farmacista. Non modificare dosaggio e orario senza consultare uno specialista.",
+  "disclaimer_privacy": "Tutti i dati sono memorizzati solo sul tuo dispositivo e non vengono condivisi con terzi.",
+  "disclaimer_btn": "Capito, inizia"
 }

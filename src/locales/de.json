@@ -86,10 +86,47 @@
   "renew_btn": "Verlängern",
   "renew_error": "Kurs konnte nicht verlängert werden",
 
-  "notif_title": "Zeit für {{name}}",
-  "notif_body": "Vergiss dein Medikament nicht",
+  "notif_title": "💊 Zeit für {{name}}",
+  "notif_body": "Tippe 'Eingenommen' um es zu markieren",
   "notif_action_taken": "Ja, eingenommen",
   "notif_action_missed": "Überspringen",
-  "notif_low_title": "Wenig Tabletten übrig",
-  "notif_low_body": "{{name}}: noch ca. {{days}} Tage. Zeit zum Nachkaufen."
+  "notif_low_title": "📦 Wenig Tabletten übrig",
+  "notif_low_body": "{{name}}: noch ca. {{days}} Tage. Zeit zum Nachkaufen.",
+  "notif_reminder_title": "⏰ {{name}} — noch nicht eingenommen",
+  "notif_reminder_body": "Erinnerung: vor {{mins}} Min. war die Einnahmezeit",
+
+  "scan_btn": "📷  Medikament fotografieren",
+  "scan_photo_title": "Foto aufnehmen",
+  "scan_processing": "Medikament wird erkannt...",
+  "scan_hint_auto": "Kamera auf Verpackung richten — Foto wird automatisch gemacht",
+  "scan_error_title": "Erkennung fehlgeschlagen",
+  "scan_error_body": "Erneut versuchen oder manuell eingeben",
+
+  "med_found": "Medikament gefunden",
+  "med_edit_hint": "Tippen Sie auf den Namen zum Bearbeiten",
+  "med_info_description": "BESCHREIBUNG",
+  "med_info_dosage": "💊 DOSIERUNG",
+  "med_info_contraindications": "⚠️ KONTRAINDIKATIONEN",
+  "med_info_side_effects": "ℹ️ NEBENWIRKUNGEN",
+  "med_info_disclaimer": "⚠️ Informationen werden von KI bereitgestellt und können Ungenauigkeiten enthalten. Befolgen Sie stets die Anweisungen Ihres Arztes.",
+  "med_info_setup": "Zeitplan einrichten →",
+  "med_name_empty_title": "Name eingeben",
+  "med_name_empty_body": "Der Name des Medikaments darf nicht leer sein",
+
+  "delete": "Löschen",
+  "details_delete_title": "Medikament löschen?",
+  "details_delete_body": "Alle Kurse und die Einnahmehistorie werden gelöscht. Diese Aktion kann nicht rückgängig gemacht werden.",
+  "course_summary": "{{n}}× täglich · {{days}} Tage",
+  "course_summary_times": "{{n}}× täglich · {{times}}",
+
+  "intake_delete_title": "Eintrag löschen?",
+  "intake_delete_body": "Diese Einnahme wird aus dem Zeitplan entfernt.",
+
+  "disclaimer_title": "Willkommen bei PillyTrack",
+  "disclaimer_subtitle": "PillyTrack hilft Ihnen, Ihren Medikamentenplan zu verfolgen und erinnert Sie rechtzeitig.",
+  "disclaimer_warning_title": "⚠️ Wichtig",
+  "disclaimer_warning_body1": "PillyTrack ist keine medizinische App und gibt keine medizinischen Ratschläge. Sie dient ausschließlich zur bequemen Nachverfolgung von Arztverordnungen.",
+  "disclaimer_warning_body2": "Befolgen Sie stets die Anweisungen Ihres Arztes oder Apothekers. Ändern Sie Dosierung und Zeitplan nicht ohne Rücksprache mit einem Spezialisten.",
+  "disclaimer_privacy": "Alle Daten werden nur auf Ihrem Gerät gespeichert und nicht an Dritte weitergegeben.",
+  "disclaimer_btn": "Verstanden, loslegen"
 }

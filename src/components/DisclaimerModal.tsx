@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 import { useFontScale } from '../context/FontScaleContext';
 import { baseSizes } from '../theme/typography';
@@ -38,6 +39,7 @@ interface Props {
 export default function DisclaimerModal({ visible, onAccept }: Props) {
   const { colors } = useTheme();
   const { scale } = useFontScale();
+  const { t } = useTranslation();
 
   return (
     <Modal visible={visible} animationType="fade" transparent={false} statusBarTranslucent>
@@ -48,32 +50,28 @@ export default function DisclaimerModal({ visible, onAccept }: Props) {
           </View>
 
           <Text style={[s.title, { color: colors.textPrimary, fontSize: baseSizes.title * scale * 1.1 }]}>
-            Добро пожаловать в PillyTrack
+            {t('disclaimer_title')}
           </Text>
 
           <ScrollView style={s.textBox} contentContainerStyle={s.textBoxInner} showsVerticalScrollIndicator={false}>
             <Text style={[s.disclaimerText, { color: colors.textSecondary, fontSize: baseSizes.body * scale }]}>
-              PillyTrack помогает отслеживать расписание приёма лекарств и напоминает вовремя.
+              {t('disclaimer_subtitle')}
             </Text>
 
             <View style={[s.warningBox, { backgroundColor: colors.warningLight, borderColor: colors.warning }]}>
               <Text style={[s.warningTitle, { color: colors.warning, fontSize: baseSizes.body * scale }]}>
-                ⚠️ Важно
+                {t('disclaimer_warning_title')}
               </Text>
               <Text style={[s.warningText, { color: colors.textPrimary, fontSize: baseSizes.body * scale }]}>
-                PillyTrack{' '}
-                <Text style={{ fontWeight: '700' }}>не является медицинским приложением</Text>
-                {' '}и не даёт медицинских рекомендаций. Приложение предназначено только для удобного
-                отслеживания назначений врача.
+                {t('disclaimer_warning_body1')}
               </Text>
               <Text style={[s.warningText, { color: colors.textPrimary, fontSize: baseSizes.body * scale, marginTop: 8 }]}>
-                Всегда следуйте инструкциям врача или фармацевта. Не изменяйте дозировку и расписание
-                без консультации со специалистом.
+                {t('disclaimer_warning_body2')}
               </Text>
             </View>
 
             <Text style={[s.disclaimerText, { color: colors.textSecondary, fontSize: baseSizes.body * scale }]}>
-              Все данные хранятся только на вашем устройстве и не передаются третьим лицам.
+              {t('disclaimer_privacy')}
             </Text>
           </ScrollView>
 
@@ -82,7 +80,7 @@ export default function DisclaimerModal({ visible, onAccept }: Props) {
             onPress={onAccept}
           >
             <Text style={[s.acceptText, { fontSize: baseSizes.button * scale }]}>
-              Понятно, начать
+              {t('disclaimer_btn')}
             </Text>
           </TouchableOpacity>
         </View>

@@ -6,8 +6,8 @@ import {
   Modal,
   TouchableOpacity,
   Animated,
-  ScrollView,
   FlatList,
+  Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Calendar } from 'react-native-calendars';
@@ -21,6 +21,8 @@ import { getIntakesForMonth } from '../db/intakes';
 import type { IntakeEvent } from '../db/intakes';
 
 type MarkedDates = Record<string, any>;
+
+const { height: SCREEN_H } = Dimensions.get('window');
 
 function buildMarkedDates(
   events: IntakeEvent[],
@@ -42,39 +44,45 @@ function buildMarkedDates(
     const isPast = date < now;
 
     let bg = 'transparent';
-    let border = false;
-    let borderColor = colors.border;
+    let borderColor = 'transparent';
     let textColor = colors.textPrimary;
 
     if (allTaken) {
-      bg = colors.successLight;
-      textColor = colors.success;
+      bg = colors.success;
+      borderColor = colors.success;
+      textColor = '#fff';
     } else if (hasMissed && isPast) {
       bg = colors.warningLight;
-      border = true;
       borderColor = colors.warning;
       textColor = colors.warning;
     } else {
-      border = true;
+      bg = 'transparent';
       borderColor = colors.border;
     }
 
     if (date === selectedDate) {
-      bg = colors.accentLight;
-      border = true;
+      bg = colors.accent;
       borderColor = colors.accent;
-      textColor = colors.accentDark;
+      textColor = '#fff';
     }
 
     marked[date] = {
       customStyles: {
         container: {
           backgroundColor: bg,
-          borderWidth: border ? 1.5 : 0,
+          borderWidth: 1.5,
           borderColor,
-          borderRadius: 16,
+          borderRadius: 20,
+          width: 36,
+          height: 36,
+          alignItems: 'center',
+          justifyContent: 'center',
         },
-        text: { color: textColor, fontWeight: date === selectedDate ? '700' : '400' },
+        text: {
+          color: textColor,
+          fontWeight: (allTaken || date === selectedDate) ? '700' : '400',
+          marginTop: 0,
+        },
       },
     };
   }
@@ -84,12 +92,16 @@ function buildMarkedDates(
     marked[selectedDate] = {
       customStyles: {
         container: {
-          backgroundColor: colors.accentLight,
+          backgroundColor: colors.accent,
           borderWidth: 1.5,
           borderColor: colors.accent,
-          borderRadius: 16,
+          borderRadius: 20,
+          width: 36,
+          height: 36,
+          alignItems: 'center',
+          justifyContent: 'center',
         },
-        text: { color: colors.accentDark, fontWeight: '700' },
+        text: { color: '#fff', fontWeight: '700', marginTop: 0 },
       },
     };
   }
@@ -100,7 +112,7 @@ function buildMarkedDates(
 export default function CalendarScreen() {
   const { colors } = useTheme();
   const { scale } = useFontScale();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const todayStr = new Date().toISOString().slice(0, 10);
   const [currentMonth, setCurrentMonth] = useState(todayStr.slice(0, 7));
@@ -152,15 +164,12 @@ export default function CalendarScreen() {
 
   return (
     <SafeAreaView style={[s.root, { backgroundColor: colors.bg }]} edges={['top']}>
-      <Text style={[s.heading, { color: colors.textPrimary, fontSize: baseSizes.title * scale }]}>
-        {t('calendar')}
-      </Text>
-
       <Calendar
         markingType="custom"
         markedDates={markedDates}
         onDayPress={onDayPress}
         onMonthChange={onMonthChange}
+        style={s.calendar}
         theme={{
           backgroundColor: colors.bg,
           calendarBackground: colors.bg,
@@ -171,7 +180,7 @@ export default function CalendarScreen() {
           monthTextColor: colors.textPrimary,
           arrowColor: colors.accent,
           textMonthFontWeight: '700',
-          textMonthFontSize: baseSizes.body * scale,
+          textMonthFontSize: baseSizes.title * scale,
           textDayFontSize: baseSizes.body * scale,
           textDayHeaderFontSize: baseSizes.caption * scale,
         }}
@@ -179,9 +188,9 @@ export default function CalendarScreen() {
 
       {/* Легенда */}
       <View style={[s.legend, { borderTopColor: colors.border }]}>
-        <LegendItem color={colors.successLight} border={colors.successLight} label={t('calendar_legend_done')} textColor={colors.success} scale={scale} />
-        <LegendItem color={colors.warningLight} border={colors.warning} label={t('calendar_legend_missed')} textColor={colors.warning} scale={scale} />
-        <LegendItem color="transparent" border={colors.border} label={t('calendar_legend_future')} textColor={colors.textSecondary} scale={scale} />
+        <LegendItem color={colors.success} label={t('calendar_legend_done')} textColor={colors.success} scale={scale} />
+        <LegendItem color={colors.warning} label={t('calendar_legend_missed')} textColor={colors.warning} scale={scale} />
+        <LegendItem color={colors.border} label={t('calendar_legend_future')} textColor={colors.textSecondary} scale={scale} />
       </View>
 
       {/* Bottom sheet */}
@@ -195,7 +204,7 @@ export default function CalendarScreen() {
         >
           <View style={[s.sheetHandle, { backgroundColor: colors.border }]} />
           <Text style={[s.sheetDate, { color: colors.textPrimary, fontSize: baseSizes.title * scale }]}>
-            {new Date(selectedDate + 'T12:00:00').toLocaleDateString('ru-RU', {
+            {new Date(selectedDate + 'T12:00:00').toLocaleDateString(i18n.language, {
               day: 'numeric',
               month: 'long',
             })}
@@ -221,10 +230,10 @@ export default function CalendarScreen() {
   );
 }
 
-function LegendItem({ color, border, label, textColor, scale }: any) {
+function LegendItem({ color, label, textColor, scale }: { color: string; label: string; textColor: string; scale: number }) {
   return (
     <View style={s.legendItem}>
-      <View style={[s.legendDot, { backgroundColor: color, borderColor: border, borderWidth: 1.5 }]} />
+      <View style={[s.legendDot, { backgroundColor: color }]} />
       <Text style={{ color: textColor, fontSize: baseSizes.caption * scale }}>{label}</Text>
     </View>
   );
@@ -273,17 +282,18 @@ function SheetEventRow({ event, colors, scale, t }: { event: IntakeEvent; colors
 
 const s = StyleSheet.create({
   root: { flex: 1 },
-  heading: { fontWeight: '700', margin: 20, marginBottom: 8 },
+  calendar: {
+    flex: 1,
+  },
   legend: {
     flexDirection: 'row',
     justifyContent: 'center',
     gap: 20,
-    paddingVertical: 12,
+    paddingVertical: 14,
     borderTopWidth: 1,
-    marginTop: 8,
   },
   legendItem: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  legendDot: { width: 14, height: 14, borderRadius: 7 },
+  legendDot: { width: 12, height: 12, borderRadius: 6 },
   backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)' },
   sheet: {
     borderTopLeftRadius: 24,

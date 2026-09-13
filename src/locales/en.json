@@ -86,10 +86,47 @@
   "renew_btn": "Renew",
   "renew_error": "Failed to renew course",
 
-  "notif_title": "Time to take {{name}}",
-  "notif_body": "Don't forget your medication",
+  "notif_title": "💊 Time to take {{name}}",
+  "notif_body": "Tap 'Taken' to mark as taken",
   "notif_action_taken": "Yes, taken",
   "notif_action_missed": "Skip",
-  "notif_low_title": "Running low on pills",
-  "notif_low_body": "{{name}}: about {{days}} days left. Time to buy a new pack."
+  "notif_low_title": "📦 Running low on pills",
+  "notif_low_body": "{{name}}: about {{days}} days left. Time to buy a new pack.",
+  "notif_reminder_title": "⏰ {{name}} — not yet taken",
+  "notif_reminder_body": "Reminder: {{mins}} min ago it was time",
+
+  "scan_btn": "📷  Scan medication",
+  "scan_photo_title": "Take Photo",
+  "scan_processing": "Recognizing medication...",
+  "scan_hint_auto": "Point at the package — photo taken automatically",
+  "scan_error_title": "Recognition failed",
+  "scan_error_body": "Try again or enter manually",
+
+  "med_found": "Medication found",
+  "med_edit_hint": "Tap the name to edit",
+  "med_info_description": "DESCRIPTION",
+  "med_info_dosage": "💊 DOSAGE",
+  "med_info_contraindications": "⚠️ CONTRAINDICATIONS",
+  "med_info_side_effects": "ℹ️ SIDE EFFECTS",
+  "med_info_disclaimer": "⚠️ Information provided by AI and may contain inaccuracies. Always follow your doctor's instructions.",
+  "med_info_setup": "Set up schedule →",
+  "med_name_empty_title": "Enter name",
+  "med_name_empty_body": "Medication name cannot be empty",
+
+  "delete": "Delete",
+  "details_delete_title": "Delete medication?",
+  "details_delete_body": "All courses and intake history will be deleted. This cannot be undone.",
+  "course_summary": "{{n}}× per day · {{days}} days",
+  "course_summary_times": "{{n}}× per day · {{times}}",
+
+  "intake_delete_title": "Delete entry?",
+  "intake_delete_body": "This intake will be removed from the schedule.",
+
+  "disclaimer_title": "Welcome to PillyTrack",
+  "disclaimer_subtitle": "PillyTrack helps you track your medication schedule and reminds you on time.",
+  "disclaimer_warning_title": "⚠️ Important",
+  "disclaimer_warning_body1": "PillyTrack is not a medical application and does not provide medical advice. It is intended only for conveniently tracking doctor prescriptions.",
+  "disclaimer_warning_body2": "Always follow your doctor's or pharmacist's instructions. Do not change dosage or schedule without consulting a specialist.",
+  "disclaimer_privacy": "All data is stored only on your device and is not shared with third parties.",
+  "disclaimer_btn": "Got it, let's start"
 }

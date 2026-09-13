@@ -13,6 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import { useFontScale } from '../../context/FontScaleContext';
 import { baseSizes } from '../../theme/typography';
@@ -32,6 +33,7 @@ const BORDER = 3;
 export default function ScanCameraScreen() {
   const { colors } = useTheme();
   const { scale } = useFontScale();
+  const { t } = useTranslation();
   const navigation = useNavigation<Nav>();
   const [permission, requestPermission] = useCameraPermissions();
   const [processing, setProcessing] = useState(false);
@@ -79,13 +81,13 @@ export default function ScanCameraScreen() {
     setProcessing(true);
     try {
       const photo = await cameraRef.current.takePictureAsync({ quality: 0.75 });
-      if (!photo) throw new Error('Не удалось сделать фото');
+      if (!photo) throw new Error(t('scan_error_title'));
 
       setField('photoUri', photo.uri);
       const info = await recognizeMedicationFromPhoto(photo.uri, ANTHROPIC_API_KEY);
       navigation.navigate('MedicationInfo', { info, photoUri: photo.uri });
     } catch (e: any) {
-      Alert.alert('Не удалось распознать', e.message ?? 'Попробуйте ещё раз или введите вручную');
+      Alert.alert(t('scan_error_title'), e.message ?? t('scan_error_body'));
       setProcessing(false);
       startAutoCapture();
     }
@@ -106,17 +108,17 @@ export default function ScanCameraScreen() {
       <SafeAreaView style={[s.root, { backgroundColor: colors.bg }]}>
         <View style={s.center}>
           <Text style={[s.permText, { color: colors.textPrimary, fontSize: baseSizes.body * scale }]}>
-            Нужен доступ к камере
+            {t('scan_permission')}
           </Text>
           <TouchableOpacity
             style={[s.btn, { backgroundColor: colors.accent }]}
             onPress={requestPermission}
           >
-            <Text style={[s.btnText, { fontSize: baseSizes.button * scale }]}>Разрешить</Text>
+            <Text style={[s.btnText, { fontSize: baseSizes.button * scale }]}>{t('scan_allow')}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={s.textBtn} onPress={goManual}>
             <Text style={{ color: colors.accent, fontSize: baseSizes.body * scale }}>
-              Ввести вручную
+              {t('scan_manual')}
             </Text>
           </TouchableOpacity>
         </View>
@@ -160,16 +162,16 @@ export default function ScanCameraScreen() {
         {/* Шапка */}
         <View style={s.header}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Text style={[s.cancel, { fontSize: baseSizes.body * scale }]}>Отмена</Text>
+            <Text style={[s.cancel, { fontSize: baseSizes.body * scale }]}>{t('cancel')}</Text>
           </TouchableOpacity>
-          <Text style={[s.title, { fontSize: baseSizes.title * scale }]}>Сфотографировать</Text>
+          <Text style={[s.title, { fontSize: baseSizes.title * scale }]}>{t('scan_photo_title')}</Text>
           <View style={{ width: 70 }} />
         </View>
 
         {/* Подсказка */}
         <View style={s.hint}>
           <Text style={[s.hintText, { fontSize: baseSizes.caption * scale }]}>
-            {processing ? 'Распознаём препарат...' : 'Наведите на упаковку — фото сделается само'}
+            {processing ? t('scan_processing') : t('scan_hint_auto')}
           </Text>
         </View>
 
@@ -177,7 +179,7 @@ export default function ScanCameraScreen() {
         <View style={s.bottom}>
           <TouchableOpacity onPress={goManual} style={s.manualWrap}>
             <Text style={[s.manualText, { fontSize: baseSizes.caption * scale }]}>
-              Ввести{'\n'}вручную
+              {t('scan_manual')}
             </Text>
           </TouchableOpacity>
 

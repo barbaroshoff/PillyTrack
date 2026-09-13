@@ -13,6 +13,7 @@ import type { NativeStackNavigationProp, NativeStackScreenProps } from '@react-n
 import { useTheme } from '../context/ThemeContext';
 import { useFontScale } from '../context/FontScaleContext';
 import { baseSizes } from '../theme/typography';
+import { useTranslation } from 'react-i18next';
 import { getMedicationById, deleteMedication } from '../db/medications';
 import { getCourseByMedicationId, updateCourseStatus } from '../db/courses';
 import { useScanFlowStore } from '../store/scanFlowStore';
@@ -30,6 +31,8 @@ type Nav = NativeStackNavigationProp<RootStackParamList>;
 export default function MedicationDetailsScreen() {
   const { colors } = useTheme();
   const { scale } = useFontScale();
+  const { t, i18n } = useTranslation();
+  const ti = (key: string, opts?: Record<string, unknown>) => i18n.t(key, opts);
   const navigation = useNavigation<Nav>();
   const { params } = useRoute<Props['route']>();
 
@@ -64,7 +67,7 @@ export default function MedicationDetailsScreen() {
     return (
       <SafeAreaView style={[s.root, { backgroundColor: colors.bg }]}>
         <View style={s.center}>
-          <Text style={{ color: colors.textMuted }}>Загрузка...</Text>
+          <Text style={{ color: colors.textMuted }}>{t('loading')}</Text>
         </View>
       </SafeAreaView>
     );
@@ -76,7 +79,7 @@ export default function MedicationDetailsScreen() {
     <SafeAreaView style={[s.root, { backgroundColor: colors.bg }]} edges={['top']}>
       <View style={s.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={{ color: colors.accent, fontSize: baseSizes.body * scale }}>Назад</Text>
+          <Text style={{ color: colors.accent, fontSize: baseSizes.body * scale }}>{t('back')}</Text>
         </TouchableOpacity>
       </View>
 
@@ -91,7 +94,7 @@ export default function MedicationDetailsScreen() {
           </Text>
           {course && (
             <Text style={{ color: colors.textSecondary, fontSize: baseSizes.body * scale }}>
-              {course.times_per_day}× в день · {course.duration_days} дней
+              {ti('course_summary', { n: course.times_per_day, days: course.duration_days })}
             </Text>
           )}
         </View>
@@ -100,10 +103,10 @@ export default function MedicationDetailsScreen() {
         {stats && course && (
           <View style={[s.card, { backgroundColor: colors.cardAlt, borderColor: colors.border }]}>
             <Text style={[s.cardLabel, { color: colors.textSecondary, fontSize: baseSizes.caption * scale }]}>
-              ПРОГРЕСС КУРСА
+              {t('details_progress_label')}
             </Text>
             <Text style={[s.progressText, { color: colors.textPrimary, fontSize: baseSizes.body * scale }]}>
-              {stats.taken} из {stats.total} доз принято
+              {ti('details_progress_text', { taken: stats.taken, total: stats.total })}
             </Text>
             <View style={[s.barBg, { backgroundColor: colors.border }]}>
               <View
@@ -111,7 +114,7 @@ export default function MedicationDetailsScreen() {
               />
             </View>
             <Text style={{ color: colors.textMuted, fontSize: baseSizes.caption * scale }}>
-              {stats.missed} пропущено
+              {ti('details_missed', { n: stats.missed })}
             </Text>
           </View>
         )}
@@ -127,7 +130,7 @@ export default function MedicationDetailsScreen() {
               })
             }
           >
-            <Text style={[s.actionBtnText, { fontSize: baseSizes.button * scale }]}>Продлить</Text>
+            <Text style={[s.actionBtnText, { fontSize: baseSizes.button * scale }]}>{t('details_renew')}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[s.actionBtn, { backgroundColor: colors.cardAlt, borderWidth: 1, borderColor: colors.border }]}
@@ -142,19 +145,19 @@ export default function MedicationDetailsScreen() {
             }}
           >
             <Text style={[s.actionBtnText, { color: colors.textPrimary, fontSize: baseSizes.button * scale }]}>
-              Изменить схему
+              {t('details_change')}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[s.actionBtn, { backgroundColor: colors.dangerLight, borderWidth: 1, borderColor: colors.danger }]}
             onPress={() =>
               Alert.alert(
-                'Удалить лекарство?',
-                'Будут удалены все курсы и история приёмов. Это действие нельзя отменить.',
+                t('details_delete_title'),
+                t('details_delete_body'),
                 [
-                  { text: 'Отмена', style: 'cancel' },
+                  { text: t('cancel'), style: 'cancel' },
                   {
-                    text: 'Удалить',
+                    text: t('delete'),
                     style: 'destructive',
                     onPress: async () => {
                       await cancelNotificationsForMedication(medication.id);
@@ -168,7 +171,7 @@ export default function MedicationDetailsScreen() {
             }
           >
             <Text style={[s.actionBtnText, { color: colors.danger, fontSize: baseSizes.button * scale }]}>
-              Удалить
+              {t('delete')}
             </Text>
           </TouchableOpacity>
         </View>
@@ -177,7 +180,7 @@ export default function MedicationDetailsScreen() {
         {history.length > 0 && (
           <View style={[s.card, { backgroundColor: colors.cardAlt, borderColor: colors.border }]}>
             <Text style={[s.cardLabel, { color: colors.textSecondary, fontSize: baseSizes.caption * scale }]}>
-              ПОСЛЕДНИЕ ПРИЁМЫ
+              {t('details_history_label')}
             </Text>
             {history.map((ev) => (
               <View key={ev.id} style={[s.historyRow, { borderBottomColor: colors.border }]}>
@@ -186,7 +189,7 @@ export default function MedicationDetailsScreen() {
                 </Text>
                 <View style={s.historyInfo}>
                   <Text style={{ color: colors.textPrimary, fontSize: baseSizes.body * scale }}>
-                    {new Date(ev.scheduled_at).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}
+                    {new Date(ev.scheduled_at).toLocaleDateString(i18n.language, { day: 'numeric', month: 'short' })}
                   </Text>
                   <Text style={{ color: colors.textMuted, fontSize: baseSizes.caption * scale }}>
                     {ev.scheduled_at.slice(11, 16)}
@@ -204,7 +207,7 @@ export default function MedicationDetailsScreen() {
                         : colors.textMuted,
                   }}
                 >
-                  {ev.status === 'taken' ? 'Принято' : ev.status === 'missed' ? 'Пропущено' : 'Ожидает'}
+                  {ev.status === 'taken' ? t('status_taken') : ev.status === 'missed' ? t('status_missed') : t('status_pending')}
                 </Text>
               </View>
             ))}

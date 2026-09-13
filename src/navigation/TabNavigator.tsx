@@ -4,6 +4,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useTranslation } from 'react-i18next';
 import TodayScreen from '../screens/TodayScreen';
 import AllCoursesScreen from '../screens/AllCoursesScreen';
 import CalendarScreen from '../screens/CalendarScreen';
@@ -22,13 +23,6 @@ export type TabParamList = {
 
 const Tab = createBottomTabNavigator<TabParamList>();
 
-const TAB_LABELS: Record<keyof TabParamList, string> = {
-  Today: 'Сегодня',
-  AllCourses: 'Курсы',
-  Calendar: 'Календарь',
-  Settings: 'Настройки',
-};
-
 const TAB_ICONS: Record<keyof TabParamList, string> = {
   Today: '💊',
   AllCourses: '📋',
@@ -36,29 +30,35 @@ const TAB_ICONS: Record<keyof TabParamList, string> = {
   Settings: '⚙️',
 };
 
+const TAB_KEYS: Record<keyof TabParamList, string> = {
+  Today: 'today',
+  AllCourses: 'courses',
+  Calendar: 'calendar',
+  Settings: 'settings',
+};
+
 function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const { colors } = useTheme();
   const { scale } = useFontScale();
+  const { t } = useTranslation();
   const rootNav = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   return (
     <View style={{ backgroundColor: colors.bg, borderTopWidth: 1, borderTopColor: colors.border }}>
-      {/* Полноширокая кнопка сканирования */}
       <TouchableOpacity
         style={[s.scanBtn, { backgroundColor: colors.accent }]}
         onPress={() => rootNav.navigate('ScanCamera')}
         activeOpacity={0.85}
       >
         <Text style={[s.scanBtnText, { fontSize: baseSizes.button * scale }]}>
-          📷  Сфотографировать препарат
+          {t('scan_btn')}
         </Text>
       </TouchableOpacity>
 
-      {/* Таб-бар */}
       <View style={[s.bar, { paddingBottom: Platform.OS === 'ios' ? 24 : 8 }]}>
         {state.routes.map((route, index) => {
           const isFocused = state.index === index;
-          const label = TAB_LABELS[route.name as keyof TabParamList];
+          const label = t(TAB_KEYS[route.name as keyof TabParamList] as any);
           const icon = TAB_ICONS[route.name as keyof TabParamList];
 
           return (

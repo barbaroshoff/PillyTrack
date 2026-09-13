@@ -11,6 +11,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp, NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useForm, Controller } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 import { useFontScale } from '../context/FontScaleContext';
 import { baseSizes } from '../theme/typography';
@@ -36,6 +37,8 @@ interface FormValues {
 export default function RenewCourseScreen() {
   const { colors } = useTheme();
   const { scale } = useFontScale();
+  const { t, i18n } = useTranslation();
+  const ti = (key: string, opts?: Record<string, unknown>) => i18n.t(key, opts);
   const navigation = useNavigation<Nav>();
   const { params } = useRoute<Props['route']>();
   const loadToday = useIntakesStore((s) => s.loadToday);
@@ -101,7 +104,7 @@ export default function RenewCourseScreen() {
       setScanField('medicationName', medication.name);
       navigation.navigate('ScanSuccess');
     } catch {
-      Alert.alert('Ошибка', 'Не удалось продлить курс');
+      Alert.alert(t('error'), t('renew_error'));
       setSaving(false);
     }
   };
@@ -110,7 +113,7 @@ export default function RenewCourseScreen() {
     return (
       <SafeAreaView style={[s.root, { backgroundColor: colors.bg }]}>
         <View style={s.center}>
-          <Text style={{ color: colors.textMuted }}>Загрузка...</Text>
+          <Text style={{ color: colors.textMuted }}>{t('loading')}</Text>
         </View>
       </SafeAreaView>
     );
@@ -120,10 +123,10 @@ export default function RenewCourseScreen() {
     <SafeAreaView style={[s.root, { backgroundColor: colors.bg }]} edges={['top']}>
       <View style={s.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={{ color: colors.accent, fontSize: baseSizes.body * scale }}>Назад</Text>
+          <Text style={{ color: colors.accent, fontSize: baseSizes.body * scale }}>{t('back')}</Text>
         </TouchableOpacity>
         <Text style={[s.title, { color: colors.textPrimary, fontSize: baseSizes.title * scale }]}>
-          Продлить курс
+          {t('renew_title')}
         </Text>
         <View style={{ width: 60 }} />
       </View>
@@ -141,7 +144,7 @@ export default function RenewCourseScreen() {
               </Text>
               {course && (
                 <Text style={{ color: colors.textSecondary, fontSize: baseSizes.caption * scale }}>
-                  {course.times_per_day}× в день · {course.custom_times.join(', ')}
+                  {ti('course_summary_times', { n: course.times_per_day, times: course.custom_times.join(', ') })}
                 </Text>
               )}
             </View>
@@ -150,7 +153,7 @@ export default function RenewCourseScreen() {
 
         {/* Количество таблеток */}
         <Text style={[s.label, { color: colors.textSecondary, fontSize: baseSizes.caption * scale }]}>
-          ТАБЛЕТОК В НОВОЙ УПАКОВКЕ
+          {t('renew_pills_label')}
         </Text>
 
         <View style={s.stepper}>
@@ -188,7 +191,7 @@ export default function RenewCourseScreen() {
           disabled={saving}
         >
           <Text style={[s.renewBtnText, { fontSize: baseSizes.button * scale }]}>
-            {saving ? 'Сохраняем...' : 'Продлить'}
+            {saving ? t('saving') : t('renew_btn')}
           </Text>
         </TouchableOpacity>
       </ScrollView>

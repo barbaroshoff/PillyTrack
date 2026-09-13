@@ -86,10 +86,47 @@
   "renew_btn": "Renovar",
   "renew_error": "Error al renovar el curso",
 
-  "notif_title": "Hora de tomar {{name}}",
-  "notif_body": "No olvides tu medicamento",
+  "notif_title": "💊 Hora de tomar {{name}}",
+  "notif_body": "Pulsa 'Tomado' para marcar como tomado",
   "notif_action_taken": "Sí, tomé",
   "notif_action_missed": "Omitir",
-  "notif_low_title": "Pocas pastillas",
-  "notif_low_body": "{{name}}: quedan unos {{days}} días. Es hora de comprar."
+  "notif_low_title": "📦 Pocas pastillas",
+  "notif_low_body": "{{name}}: quedan unos {{days}} días. Es hora de comprar.",
+  "notif_reminder_title": "⏰ {{name}} — aún no tomado",
+  "notif_reminder_body": "Recordatorio: hace {{mins}} min era la hora",
+
+  "scan_btn": "📷  Fotografiar medicamento",
+  "scan_photo_title": "Tomar foto",
+  "scan_processing": "Reconociendo medicamento...",
+  "scan_hint_auto": "Apunta al envase — la foto se toma sola",
+  "scan_error_title": "No se pudo reconocer",
+  "scan_error_body": "Intenta de nuevo o introduce manualmente",
+
+  "med_found": "Medicamento encontrado",
+  "med_edit_hint": "Toca el nombre para editar",
+  "med_info_description": "DESCRIPCIÓN",
+  "med_info_dosage": "💊 DOSIFICACIÓN",
+  "med_info_contraindications": "⚠️ CONTRAINDICACIONES",
+  "med_info_side_effects": "ℹ️ EFECTOS SECUNDARIOS",
+  "med_info_disclaimer": "⚠️ Información proporcionada por IA y puede contener imprecisiones. Siga siempre las instrucciones del médico.",
+  "med_info_setup": "Configurar horario →",
+  "med_name_empty_title": "Introduce el nombre",
+  "med_name_empty_body": "El nombre del medicamento no puede estar vacío",
+
+  "delete": "Eliminar",
+  "details_delete_title": "¿Eliminar medicamento?",
+  "details_delete_body": "Se eliminarán todos los cursos e historial de tomas. Esta acción no se puede deshacer.",
+  "course_summary": "{{n}}× al día · {{days}} días",
+  "course_summary_times": "{{n}}× al día · {{times}}",
+
+  "intake_delete_title": "¿Eliminar registro?",
+  "intake_delete_body": "Esta toma se eliminará del horario.",
+
+  "disclaimer_title": "Bienvenido a PillyTrack",
+  "disclaimer_subtitle": "PillyTrack te ayuda a seguir tu horario de medicamentos y te recuerda a tiempo.",
+  "disclaimer_warning_title": "⚠️ Importante",
+  "disclaimer_warning_body1": "PillyTrack no es una aplicación médica y no da consejos médicos. Está destinada únicamente a registrar las prescripciones del médico.",
+  "disclaimer_warning_body2": "Siga siempre las instrucciones de su médico o farmacéutico. No cambie la dosis ni el horario sin consultar a un especialista.",
+  "disclaimer_privacy": "Todos los datos se almacenan solo en su dispositivo y no se comparten con terceros.",
+  "disclaimer_btn": "Entendido, empezar"
 }

@@ -3,11 +3,12 @@ import * as Device from 'expo-device';
 import type { IntakeEvent } from '../db/intakes';
 import { markIntakeEvent } from '../db/intakes';
 import { getDb } from '../db/client';
+import i18n from '../i18n';
 
 const CATEGORY_ID = 'intake_reminder';
 const MAX_MAIN_EVENTS = 40;
 const REMINDER_HORIZON_HOURS = 48;
-const REMINDER_INTERVALS_MIN = [20, 40]; // повторы через 20 и 40 мин
+const REMINDER_INTERVALS_MIN = [20, 40];
 
 export async function requestNotificationPermissions(): Promise<boolean> {
   if (!Device.isDevice) return false;
@@ -21,8 +22,8 @@ export async function requestNotificationPermissions(): Promise<boolean> {
 
 export async function setupNotificationCategories(): Promise<void> {
   await Notifications.setNotificationCategoryAsync(CATEGORY_ID, [
-    { identifier: 'taken', buttonTitle: 'Да, принял', options: { isDestructive: false } },
-    { identifier: 'missed', buttonTitle: 'Пропустить', options: { isDestructive: true } },
+    { identifier: 'taken', buttonTitle: i18n.t('notif_action_taken'), options: { isDestructive: false } },
+    { identifier: 'missed', buttonTitle: i18n.t('notif_action_missed'), options: { isDestructive: true } },
   ]);
 }
 
@@ -50,12 +51,11 @@ export async function scheduleIntakeNotifications(
   for (const ev of toSchedule) {
     const triggerMs = new Date(ev.scheduled_at).getTime();
 
-    // Основное уведомление
     await Notifications.scheduleNotificationAsync({
       identifier: ev.id,
       content: {
-        title: `💊 Время принять ${medicationName}`,
-        body: 'Нажмите «Принял» чтобы отметить приём',
+        title: i18n.t('notif_title', { name: medicationName }),
+        body: i18n.t('notif_body'),
         data: { intakeId: ev.id },
         categoryIdentifier: CATEGORY_ID,
         sound: true,
@@ -66,7 +66,6 @@ export async function scheduleIntakeNotifications(
       },
     });
 
-    // Повторные напоминания — только для событий в ближайшие 48 часов
     if (triggerMs < now + reminderHorizonMs) {
       for (const mins of REMINDER_INTERVALS_MIN) {
         const reminderMs = triggerMs + mins * 60 * 1000;
@@ -74,8 +73,8 @@ export async function scheduleIntakeNotifications(
           await Notifications.scheduleNotificationAsync({
             identifier: `${ev.id}_r${mins}`,
             content: {
-              title: `⏰ ${medicationName} — ещё не принято`,
-              body: `Напоминаем: ${mins} мин назад было время приёма`,
+              title: i18n.t('notif_reminder_title', { name: medicationName }),
+              body: i18n.t('notif_reminder_body', { mins }),
               data: { intakeId: ev.id },
               categoryIdentifier: CATEGORY_ID,
               sound: true,
@@ -90,7 +89,6 @@ export async function scheduleIntakeNotifications(
     }
   }
 
-  // Уведомление о конце упаковки
   const lastEvent = toSchedule[toSchedule.length - 1];
   if (lastEvent) {
     const warningDate = new Date(lastEvent.scheduled_at);
@@ -99,8 +97,8 @@ export async function scheduleIntakeNotifications(
       await Notifications.scheduleNotificationAsync({
         identifier: `low_supply_${events[0]?.course_id}`,
         content: {
-          title: '📦 Заканчиваются таблетки',
-          body: `${medicationName}: осталось примерно 3 дня. Пора купить новую упаковку.`,
+          title: i18n.t('notif_low_title'),
+          body: i18n.t('notif_low_body', { name: medicationName, days: 3 }),
           sound: true,
         },
         trigger: {

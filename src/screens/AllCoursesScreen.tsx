@@ -84,9 +84,6 @@ export default function AllCoursesScreen() {
           <CourseCard
             course={item}
             onPress={() => navigation.navigate('MedicationDetails', { medicationId: item.medication_id })}
-            colors={colors}
-            scale={scale}
-            t={t}
           />
         )}
       />
@@ -97,14 +94,14 @@ export default function AllCoursesScreen() {
 interface CardProps {
   course: CourseWithMedication;
   onPress: () => void;
-  colors: any;
-  scale: number;
-  t: (key: string) => string;
 }
 
-function CourseCard({ course, onPress, colors, scale, t }: CardProps) {
+function CourseCard({ course, onPress }: CardProps) {
+  const { colors } = useTheme();
+  const { scale } = useFontScale();
+  const { t, i18n } = useTranslation();
   const nextTime = course.next_intake_at
-    ? new Date(course.next_intake_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
+    ? new Date(course.next_intake_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     : null;
 
   return (
@@ -125,7 +122,7 @@ function CourseCard({ course, onPress, colors, scale, t }: CardProps) {
             {course.medication_name}
           </Text>
           <Text style={{ color: colors.textSecondary, fontSize: baseSizes.caption * scale }}>
-            {course.times_per_day}× в день · {course.duration_days} дней
+            {i18n.t('course_summary', { n: course.times_per_day, days: course.duration_days })}
           </Text>
         </View>
         <Text style={{ color: colors.textMuted, fontSize: 18 }}>›</Text>

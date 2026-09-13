@@ -86,10 +86,47 @@
   "renew_btn": "Przedłuż",
   "renew_error": "Nie udało się przedłużyć kursu",
 
-  "notif_title": "Czas przyjąć {{name}}",
-  "notif_body": "Nie zapomnij o leku",
+  "notif_title": "💊 Czas przyjąć {{name}}",
+  "notif_body": "Dotknij 'Przyjąłem' aby oznaczyć",
   "notif_action_taken": "Tak, przyjąłem",
   "notif_action_missed": "Pomiń",
-  "notif_low_title": "Mało tabletek",
-  "notif_low_body": "{{name}}: zostało ok. {{days}} dni. Czas na zakup."
+  "notif_low_title": "📦 Mało tabletek",
+  "notif_low_body": "{{name}}: zostało ok. {{days}} dni. Czas na zakup.",
+  "notif_reminder_title": "⏰ {{name}} — jeszcze nieprzyjęte",
+  "notif_reminder_body": "Przypomnienie: {{mins}} min temu była pora",
+
+  "scan_btn": "📷  Sfotografuj lek",
+  "scan_photo_title": "Zrób zdjęcie",
+  "scan_processing": "Rozpoznawanie leku...",
+  "scan_hint_auto": "Skieruj na opakowanie — zdjęcie zrobi się samo",
+  "scan_error_title": "Nie udało się rozpoznać",
+  "scan_error_body": "Spróbuj ponownie lub wpisz ręcznie",
+
+  "med_found": "Lek znaleziony",
+  "med_edit_hint": "Dotknij nazwy, aby edytować",
+  "med_info_description": "OPIS",
+  "med_info_dosage": "💊 DAWKOWANIE",
+  "med_info_contraindications": "⚠️ PRZECIWWSKAZANIA",
+  "med_info_side_effects": "ℹ️ DZIAŁANIA NIEPOŻĄDANE",
+  "med_info_disclaimer": "⚠️ Informacje dostarczone przez AI mogą zawierać nieścisłości. Zawsze stosuj się do zaleceń lekarza.",
+  "med_info_setup": "Ustaw harmonogram →",
+  "med_name_empty_title": "Wprowadź nazwę",
+  "med_name_empty_body": "Nazwa leku nie może być pusta",
+
+  "delete": "Usuń",
+  "details_delete_title": "Usunąć lek?",
+  "details_delete_body": "Wszystkie kursy i historia przyjęć zostaną usunięte. Tej operacji nie można cofnąć.",
+  "course_summary": "{{n}}× dziennie · {{days}} dni",
+  "course_summary_times": "{{n}}× dziennie · {{times}}",
+
+  "intake_delete_title": "Usunąć wpis?",
+  "intake_delete_body": "To przyjęcie zostanie usunięte z harmonogramu.",
+
+  "disclaimer_title": "Witaj w PillyTrack",
+  "disclaimer_subtitle": "PillyTrack pomaga śledzić harmonogram leków i przypomina na czas.",
+  "disclaimer_warning_title": "⚠️ Ważne",
+  "disclaimer_warning_body1": "PillyTrack nie jest aplikacją medyczną i nie udziela porad medycznych. Służy jedynie do wygodnego śledzenia zaleceń lekarza.",
+  "disclaimer_warning_body2": "Zawsze stosuj się do zaleceń lekarza lub farmaceuty. Nie zmieniaj dawkowania ani harmonogramu bez konsultacji ze specjalistą.",
+  "disclaimer_privacy": "Wszystkie dane są przechowywane tylko na Twoim urządzeniu i nie są udostępniane osobom trzecim.",
+  "disclaimer_btn": "Rozumiem, zaczynamy"
 }

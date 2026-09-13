@@ -12,6 +12,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp, NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import { useFontScale } from '../../context/FontScaleContext';
 import { baseSizes } from '../../theme/typography';
@@ -24,6 +25,7 @@ type Nav = NativeStackNavigationProp<RootStackParamList>;
 export default function MedicationInfoScreen() {
   const { colors } = useTheme();
   const { scale } = useFontScale();
+  const { t } = useTranslation();
   const navigation = useNavigation<Nav>();
   const { params } = useRoute<Props['route']>();
   const { info, photoUri } = params;
@@ -39,7 +41,7 @@ export default function MedicationInfoScreen() {
   const proceed = () => {
     const trimmedName = name.trim();
     if (!trimmedName) {
-      Alert.alert('Введите название', 'Название препарата не может быть пустым');
+      Alert.alert(t('med_name_empty_title'), t('med_name_empty_body'));
       return;
     }
     setField('medicationName', trimmedName);
@@ -52,16 +54,15 @@ export default function MedicationInfoScreen() {
     <SafeAreaView style={[s.root, { backgroundColor: colors.bg }]}>
       <View style={s.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={{ color: colors.accent, fontSize: baseSizes.body * scale }}>Назад</Text>
+          <Text style={{ color: colors.accent, fontSize: baseSizes.body * scale }}>{t('back')}</Text>
         </TouchableOpacity>
         <Text style={[s.title, { color: colors.textPrimary, fontSize: baseSizes.title * scale }]}>
-          Препарат найден
+          {t('med_found')}
         </Text>
         <View style={{ width: 60 }} />
       </View>
 
       <ScrollView contentContainerStyle={s.scroll} keyboardShouldPersistTaps="handled">
-        {/* Баннер с фото и названием */}
         <View style={[s.banner, { backgroundColor: colors.accentLight }]}>
           {photoUri ? (
             <Image source={{ uri: photoUri }} style={s.photo} resizeMode="cover" />
@@ -85,20 +86,18 @@ export default function MedicationInfoScreen() {
             textAlign="center"
           />
           <Text style={{ color: colors.textSecondary, fontSize: baseSizes.caption * scale }}>
-            Нажмите на название чтобы изменить
+            {t('med_edit_hint')}
           </Text>
         </View>
 
-        {/* Карточки с информацией */}
-        <InfoCard title="ОПИСАНИЕ" text={info.description} colors={colors} scale={scale} />
-        <InfoCard title="💊 ДОЗИРОВКА" text={info.dosage} colors={colors} scale={scale} />
-        <InfoCard title="⚠️ ПРОТИВОПОКАЗАНИЯ" text={info.contraindications} colors={colors} scale={scale} />
-        <InfoCard title="ℹ️ ПОБОЧНЫЕ ЭФФЕКТЫ" text={info.sideEffects} colors={colors} scale={scale} />
+        <InfoCard title={t('med_info_description')} text={info.description} colors={colors} scale={scale} />
+        <InfoCard title={t('med_info_dosage')} text={info.dosage} colors={colors} scale={scale} />
+        <InfoCard title={t('med_info_contraindications')} text={info.contraindications} colors={colors} scale={scale} />
+        <InfoCard title={t('med_info_side_effects')} text={info.sideEffects} colors={colors} scale={scale} />
 
-        {/* Количество таблеток */}
         <View style={[s.pillsCard, { backgroundColor: colors.cardAlt, borderColor: colors.border }]}>
           <Text style={[s.cardLabel, { color: colors.textSecondary, fontSize: baseSizes.caption * scale }]}>
-            ТАБЛЕТОК В УПАКОВКЕ
+            {t('confirm_pills_label')}
           </Text>
           <View style={s.stepper}>
             <TouchableOpacity
@@ -123,15 +122,14 @@ export default function MedicationInfoScreen() {
           </View>
         </View>
 
-        {/* Дисклеймер */}
         <View style={[s.disclaimer, { backgroundColor: colors.warningLight, borderColor: colors.warning }]}>
           <Text style={{ color: colors.warning, fontSize: baseSizes.caption * scale, lineHeight: 18 }}>
-            ⚠️ Информация предоставлена AI и может содержать неточности. Всегда следуйте инструкции врача.
+            {t('med_info_disclaimer')}
           </Text>
         </View>
 
         <TouchableOpacity style={[s.nextBtn, { backgroundColor: colors.accent }]} onPress={proceed}>
-          <Text style={[s.nextText, { fontSize: baseSizes.button * scale }]}>Настроить расписание →</Text>
+          <Text style={[s.nextText, { fontSize: baseSizes.button * scale }]}>{t('med_info_setup')}</Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>

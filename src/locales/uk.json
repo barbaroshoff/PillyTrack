@@ -86,10 +86,47 @@
   "renew_btn": "Продовжити",
   "renew_error": "Не вдалося продовжити курс",
 
-  "notif_title": "Час прийняти {{name}}",
-  "notif_body": "Не забудьте про ліки",
+  "notif_title": "💊 Час прийняти {{name}}",
+  "notif_body": "Натисніть «Прийняв» щоб відмітити прийом",
   "notif_action_taken": "Так, прийняв",
   "notif_action_missed": "Пропустити",
-  "notif_low_title": "Закінчуються таблетки",
-  "notif_low_body": "{{name}}: залишилось приблизно {{days}} днів. Час купити нову упаковку."
+  "notif_low_title": "📦 Закінчуються таблетки",
+  "notif_low_body": "{{name}}: залишилось приблизно {{days}} днів. Час купити нову упаковку.",
+  "notif_reminder_title": "⏰ {{name}} — ще не прийнято",
+  "notif_reminder_body": "Нагадуємо: {{mins}} хв тому був час прийому",
+
+  "scan_btn": "📷  Сфотографувати препарат",
+  "scan_photo_title": "Сфотографувати",
+  "scan_processing": "Розпізнаємо препарат...",
+  "scan_hint_auto": "Наведіть на упаковку — фото зробиться само",
+  "scan_error_title": "Не вдалося розпізнати",
+  "scan_error_body": "Спробуйте ще раз або введіть вручну",
+
+  "med_found": "Препарат знайдено",
+  "med_edit_hint": "Натисніть на назву, щоб змінити",
+  "med_info_description": "ОПИС",
+  "med_info_dosage": "💊 ДОЗУВАННЯ",
+  "med_info_contraindications": "⚠️ ПРОТИПОКАЗАННЯ",
+  "med_info_side_effects": "ℹ️ ПОБІЧНІ ЕФЕКТИ",
+  "med_info_disclaimer": "⚠️ Інформацію надано AI і може містити неточності. Завжди дотримуйтесь вказівок лікаря.",
+  "med_info_setup": "Налаштувати розклад →",
+  "med_name_empty_title": "Введіть назву",
+  "med_name_empty_body": "Назва препарату не може бути порожньою",
+
+  "delete": "Видалити",
+  "details_delete_title": "Видалити ліки?",
+  "details_delete_body": "Будуть видалені всі курси та історія прийомів. Цю дію не можна скасувати.",
+  "course_summary": "{{n}}× на день · {{days}} днів",
+  "course_summary_times": "{{n}}× на день · {{times}}",
+
+  "intake_delete_title": "Видалити запис?",
+  "intake_delete_body": "Прийом буде видалено з розкладу.",
+
+  "disclaimer_title": "Ласкаво просимо до PillyTrack",
+  "disclaimer_subtitle": "PillyTrack допомагає відстежувати розклад прийому ліків і нагадує вчасно.",
+  "disclaimer_warning_title": "⚠️ Важливо",
+  "disclaimer_warning_body1": "PillyTrack не є медичним застосунком і не надає медичних рекомендацій. Призначений лише для зручного відстеження призначень лікаря.",
+  "disclaimer_warning_body2": "Завжди дотримуйтесь вказівок лікаря або фармацевта. Не змінюйте дозування і розклад без консультації зі спеціалістом.",
+  "disclaimer_privacy": "Всі дані зберігаються лише на вашому пристрої і не передаються третім особам.",
+  "disclaimer_btn": "Зрозуміло, почати"
 }
