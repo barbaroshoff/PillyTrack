@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { IntakeEvent, IntakeStatus } from '../db/intakes';
 import { getIntakesForDate, markIntakeEvent } from '../db/intakes';
+import { completeCourseIfDone } from '../db/courses';
 
 interface IntakesState {
   intakes: IntakeEvent[];
@@ -22,11 +23,13 @@ export const useIntakesStore = create<IntakesState>((set, get) => ({
 
   markIntake: async (id, status) => {
     await markIntakeEvent(id, status);
-    set((s) => ({
-      intakes: s.intakes.map((i) =>
-        i.id === id ? { ...i, status, marked_at: new Date().toISOString() } : i,
-      ),
-    }));
+    const updated = get().intakes.map((i) =>
+      i.id === id ? { ...i, status, marked_at: new Date().toISOString() } : i,
+    );
+    set({ intakes: updated });
+
+    const intake = get().intakes.find((i) => i.id === id);
+    if (intake) await completeCourseIfDone(intake.course_id);
   },
 }));
 

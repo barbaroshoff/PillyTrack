@@ -5,6 +5,7 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -12,8 +13,10 @@ import type { NativeStackNavigationProp, NativeStackScreenProps } from '@react-n
 import { useTheme } from '../context/ThemeContext';
 import { useFontScale } from '../context/FontScaleContext';
 import { baseSizes } from '../theme/typography';
-import { getMedicationById } from '../db/medications';
-import { getCourseByMedicationId } from '../db/courses';
+import { getMedicationById, deleteMedication } from '../db/medications';
+import { getCourseByMedicationId, updateCourseStatus } from '../db/courses';
+import { useScanFlowStore } from '../store/scanFlowStore';
+import { useIntakesStore } from '../store/intakesStore';
 import { getIntakeStatsByCourse, getRecentIntakesByCourse } from '../db/intakes';
 import type { Medication } from '../db/medications';
 import type { Course } from '../db/courses';
@@ -33,6 +36,9 @@ export default function MedicationDetailsScreen() {
   const [course, setCourse] = useState<Course | null>(null);
   const [stats, setStats] = useState<IntakeStats | null>(null);
   const [history, setHistory] = useState<IntakeEvent[]>([]);
+  const resetScan = useScanFlowStore((s) => s.reset);
+  const setScanField = useScanFlowStore((s) => s.setField);
+  const loadToday = useIntakesStore((s) => s.loadToday);
 
   useEffect(() => {
     (async () => {
@@ -162,10 +168,42 @@ export default function MedicationDetailsScreen() {
           </TouchableOpacity>
           <TouchableOpacity
             style={[s.actionBtn, { backgroundColor: colors.cardAlt, borderWidth: 1, borderColor: colors.border }]}
-            onPress={() => navigation.navigate('ScanSchedule')}
+            onPress={async () => {
+              if (course) await updateCourseStatus(course.id, 'completed');
+              resetScan();
+              setScanField('medicationName', medication.name);
+              setScanField('pillsPerPack', medication.pills_per_pack);
+              setScanField('existingMedicationId', medication.id);
+              navigation.navigate('ScanSchedule');
+            }}
           >
             <Text style={[s.actionBtnText, { color: colors.textPrimary, fontSize: baseSizes.button * scale }]}>
               Изменить схему
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[s.actionBtn, { backgroundColor: colors.dangerLight, borderWidth: 1, borderColor: colors.danger }]}
+            onPress={() =>
+              Alert.alert(
+                'Удалить лекарство?',
+                'Будут удалены все курсы и история приёмов. Это действие нельзя отменить.',
+                [
+                  { text: 'Отмена', style: 'cancel' },
+                  {
+                    text: 'Удалить',
+                    style: 'destructive',
+                    onPress: async () => {
+                      await deleteMedication(medication.id);
+                      await loadToday();
+                      navigation.goBack();
+                    },
+                  },
+                ],
+              )
+            }
+          >
+            <Text style={[s.actionBtnText, { color: colors.danger, fontSize: baseSizes.button * scale }]}>
+              Удалить
             </Text>
           </TouchableOpacity>
         </View>

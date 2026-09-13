@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useMemo, useRef } from 'react';
+import React, { useCallback, useState, useMemo, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -12,7 +12,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Calendar } from 'react-native-calendars';
 import type { DateData } from 'react-native-calendars';
-import { useFocusEffect } from '@react-navigation/native';
+import { useIsFocused } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 import { useFontScale } from '../context/FontScaleContext';
@@ -108,13 +108,16 @@ export default function CalendarScreen() {
   const [events, setEvents] = useState<IntakeEvent[]>([]);
   const [sheetVisible, setSheetVisible] = useState(false);
   const slideY = useRef(new Animated.Value(400)).current;
+  const isFocused = useIsFocused();
 
   const load = useCallback(async (month: string) => {
     const data = await getIntakesForMonth(month);
     setEvents(data);
   }, []);
 
-  useFocusEffect(useCallback(() => { load(currentMonth); }, [load, currentMonth]));
+  useEffect(() => {
+    if (isFocused) load(currentMonth);
+  }, [isFocused, currentMonth, load]);
 
   const markedDates = useMemo(
     () => buildMarkedDates(events, selectedDate, colors),
@@ -240,12 +243,26 @@ function SheetEventRow({ event, colors, scale, t }: { event: IntakeEvent; colors
     ? colors.danger
     : colors.warning;
 
+  const badgeBg = event.status === 'taken'
+    ? colors.successLight
+    : event.status === 'missed'
+    ? colors.dangerLight
+    : colors.warningLight;
+
   return (
     <View style={[s.sheetRow, { borderColor: colors.border }]}>
-      <Text style={{ color: colors.textPrimary, fontSize: baseSizes.body * scale }}>
-        {event.scheduled_at.slice(11, 16)}
-      </Text>
-      <View style={[s.statusBadge, { backgroundColor: event.status === 'taken' ? colors.successLight : event.status === 'missed' ? colors.dangerLight : colors.warningLight }]}>
+      <View style={[s.sheetIconWrap, { backgroundColor: colors.accentLight }]}>
+        <Text style={{ fontSize: 16 }}>💊</Text>
+      </View>
+      <View style={{ flex: 1 }}>
+        <Text style={{ color: colors.textPrimary, fontSize: baseSizes.body * scale, fontWeight: '600' }} numberOfLines={1}>
+          {event.medication_name ?? '—'}
+        </Text>
+        <Text style={{ color: colors.textMuted, fontSize: baseSizes.caption * scale }}>
+          {event.scheduled_at.slice(11, 16)}
+        </Text>
+      </View>
+      <View style={[s.statusBadge, { backgroundColor: badgeBg }]}>
         <Text style={{ color: statusColor, fontSize: baseSizes.caption * scale, fontWeight: '600' }}>
           {statusLabel}
         </Text>
@@ -285,10 +302,17 @@ const s = StyleSheet.create({
   sheetRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    gap: 10,
     padding: 12,
     borderWidth: 1,
     borderRadius: 12,
+  },
+  sheetIconWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   statusBadge: { paddingHorizontal: 12, paddingVertical: 4, borderRadius: 20 },
 });

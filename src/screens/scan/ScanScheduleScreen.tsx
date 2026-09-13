@@ -99,17 +99,19 @@ export default function ScanScheduleScreen() {
         ? customTimes.slice(0, timesPerDay)
         : PRESETS.find(p => p.times === timesPerDay)?.times_arr ?? ['08:00'];
 
-      const medicationId = generateId();
+      const medicationId = store.existingMedicationId ?? generateId();
       const courseId = generateId();
       const startDate = new Date();
 
-      await insertMedication({
-        id: medicationId,
-        name: store.medicationName,
-        photo_uri: store.photoUri,
-        barcode: store.barcode,
-        pills_per_pack: store.pillsPerPack,
-      });
+      if (!store.existingMedicationId) {
+        await insertMedication({
+          id: medicationId,
+          name: store.medicationName,
+          photo_uri: store.photoUri,
+          barcode: store.barcode,
+          pills_per_pack: store.pillsPerPack,
+        });
+      }
 
       const { durationDays, intakeEvents } = calculateCourse({
         courseId,

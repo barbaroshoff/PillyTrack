@@ -63,6 +63,17 @@ export async function getActiveCoursesWithMedications(): Promise<CourseWithMedic
   return rows.map((r) => ({ ...r, custom_times: JSON.parse(r.custom_times) }));
 }
 
+export async function completeCourseIfDone(courseId: string): Promise<void> {
+  const db = await getDb();
+  const row = await db.getFirstAsync<{ cnt: number }>(
+    `SELECT COUNT(*) as cnt FROM intake_events WHERE course_id = ? AND status = 'pending'`,
+    [courseId],
+  );
+  if (row && row.cnt === 0) {
+    await db.runAsync(`UPDATE courses SET status = 'completed' WHERE id = ?`, [courseId]);
+  }
+}
+
 export async function getCourseById(id: string): Promise<Course | null> {
   const db = await getDb();
   const row = await db.getFirstAsync<Omit<Course, 'custom_times'> & { custom_times: string }>(

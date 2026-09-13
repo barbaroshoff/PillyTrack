@@ -19,6 +19,7 @@ import { getCourseByMedicationId, insertCourse } from '../db/courses';
 import { insertIntakeEvents } from '../db/intakes';
 import { calculateCourse } from '../services/scheduleEngine';
 import { scheduleIntakeNotifications } from '../services/notifications';
+import { useScanFlowStore } from '../store/scanFlowStore';
 import { useIntakesStore } from '../store/intakesStore';
 import { generateId } from '../utils/id';
 import type { Medication } from '../db/medications';
@@ -38,6 +39,7 @@ export default function RenewCourseScreen() {
   const navigation = useNavigation<Nav>();
   const { params } = useRoute<Props['route']>();
   const loadToday = useIntakesStore((s) => s.loadToday);
+  const setScanField = useScanFlowStore((s) => s.setField);
 
   const [medication, setMedication] = useState<Medication | null>(null);
   const [course, setCourse] = useState<Course | null>(null);
@@ -92,7 +94,7 @@ export default function RenewCourseScreen() {
       await insertIntakeEvents(eventsWithIds);
       await scheduleIntakeNotifications(medication.name, eventsWithIds);
       await loadToday();
-
+      setScanField('medicationName', medication.name);
       navigation.navigate('ScanSuccess');
     } catch {
       Alert.alert('Ошибка', 'Не удалось продлить курс');

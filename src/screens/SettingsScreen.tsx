@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
@@ -121,7 +121,7 @@ export default function SettingsScreen() {
           label={t('settings_notifications')}
           colors={colors}
           scale={scale}
-          onPress={() => {}}
+          onPress={() => Linking.openSettings()}
         />
 
         {/* О приложении */}
