@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   Animated,
   FlatList,
-  Dimensions,
+  LayoutChangeEvent,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Calendar } from 'react-native-calendars';
@@ -22,7 +22,11 @@ import type { IntakeEvent } from '../db/intakes';
 
 type MarkedDates = Record<string, any>;
 
-const { height: SCREEN_H } = Dimensions.get('window');
+// Внутренние константы react-native-calendars
+const CAL_HEADER_H = 46;  // строка месяц + стрелки
+const CAL_NAMES_H  = 30;  // строка Пн Вт Ср…
+const ROWS         = 6;   // максимум строк в месяце
+const ROW_MARGIN   = 8;   // margin-top + bottom одной строки
 
 function buildMarkedDates(
   events: IntakeEvent[],
@@ -42,6 +46,7 @@ function buildMarkedDates(
     const allTaken = evs.every((e) => e.status === 'taken');
     const hasMissed = evs.some((e) => e.status === 'missed');
     const isPast = date < now;
+    const isSelected = date === selectedDate;
 
     let bg = 'transparent';
     let borderColor = 'transparent';
@@ -60,19 +65,18 @@ function buildMarkedDates(
       borderColor = colors.border;
     }
 
-    const isSelected = date === selectedDate;
-
     marked[date] = {
       customStyles: {
         container: {
           backgroundColor: bg,
           borderWidth: isSelected ? 2.5 : 1.5,
           borderColor: isSelected ? colors.accent : borderColor,
-          borderRadius: 18,
+          borderRadius: 999,
         },
         text: {
           color: textColor,
           fontWeight: (allTaken || isSelected) ? '700' : '400',
+          marginTop: 0,
         },
       },
     };
@@ -86,9 +90,9 @@ function buildMarkedDates(
           backgroundColor: colors.accent,
           borderWidth: 2.5,
           borderColor: colors.accent,
-          borderRadius: 18,
+          borderRadius: 999,
         },
-        text: { color: '#fff', fontWeight: '700' },
+        text: { color: '#fff', fontWeight: '700', marginTop: 0 },
       },
     };
   }
@@ -106,6 +110,7 @@ export default function CalendarScreen() {
   const [selectedDate, setSelectedDate] = useState(todayStr);
   const [events, setEvents] = useState<IntakeEvent[]>([]);
   const [sheetVisible, setSheetVisible] = useState(false);
+  const [cellSize, setCellSize] = useState(40);
   const slideY = useRef(new Animated.Value(400)).current;
   const isFocused = useIsFocused();
 
@@ -149,53 +154,58 @@ export default function CalendarScreen() {
     setCurrentMonth(ym);
   };
 
+  const onCalendarContainerLayout = (e: LayoutChangeEvent) => {
+    const h = e.nativeEvent.layout.height;
+    const gridH = h - CAL_HEADER_H - CAL_NAMES_H;
+    const size = Math.max(32, Math.floor(gridH / ROWS) - ROW_MARGIN);
+    setCellSize(size);
+  };
+
   return (
     <SafeAreaView style={[s.root, { backgroundColor: colors.bg }]} edges={['top']}>
-      <Text style={[s.heading, { color: colors.textPrimary, fontSize: baseSizes.title * scale }]}>
-        {t('calendar')}
-      </Text>
-
-      <Calendar
-        markingType="custom"
-        markedDates={markedDates}
-        onDayPress={onDayPress}
-        onMonthChange={onMonthChange}
-        theme={{
-          backgroundColor: colors.bg,
-          calendarBackground: colors.bg,
-          textSectionTitleColor: colors.textSecondary,
-          todayTextColor: colors.accent,
-          dayTextColor: colors.textPrimary,
-          textDisabledColor: colors.textMuted,
-          monthTextColor: colors.textPrimary,
-          arrowColor: colors.accent,
-          textMonthFontWeight: '700',
-          textMonthFontSize: baseSizes.title * scale,
-          textDayFontSize: baseSizes.body * scale,
-          textDayHeaderFontSize: baseSizes.caption * scale,
-          // увеличиваем высоту строк чтобы занять весь экран
-          'stylesheet.calendar.main': {
-            week: {
-              marginTop: 6,
-              marginBottom: 6,
-              flexDirection: 'row',
-              justifyContent: 'space-around',
+      {/* Контейнер календаря занимает всё свободное место */}
+      <View style={s.calendarContainer} onLayout={onCalendarContainerLayout}>
+        <Calendar
+          markingType="custom"
+          markedDates={markedDates}
+          onDayPress={onDayPress}
+          onMonthChange={onMonthChange}
+          theme={{
+            backgroundColor: colors.bg,
+            calendarBackground: colors.bg,
+            textSectionTitleColor: colors.textSecondary,
+            todayTextColor: colors.accent,
+            dayTextColor: colors.textPrimary,
+            textDisabledColor: colors.textMuted,
+            monthTextColor: colors.textPrimary,
+            arrowColor: colors.accent,
+            textMonthFontWeight: '700',
+            textMonthFontSize: baseSizes.body * scale,
+            textDayFontSize: baseSizes.body * scale,
+            textDayHeaderFontSize: baseSizes.caption * scale,
+            'stylesheet.calendar.main': {
+              week: {
+                marginTop: ROW_MARGIN / 2,
+                marginBottom: ROW_MARGIN / 2,
+                flexDirection: 'row',
+                justifyContent: 'space-around',
+              },
             },
-          },
-          'stylesheet.day.basic': {
-            base: {
-              width: 44,
-              height: 44,
-              alignItems: 'center',
-              justifyContent: 'center',
+            'stylesheet.day.basic': {
+              base: {
+                width: cellSize,
+                height: cellSize,
+                alignItems: 'center',
+                justifyContent: 'center',
+              },
+              text: {
+                marginTop: 0,
+                fontSize: baseSizes.body * scale,
+              },
             },
-            text: {
-              marginTop: 0,
-              fontSize: baseSizes.body * scale,
-            },
-          },
-        } as any}
-      />
+          } as any}
+        />
+      </View>
 
       {/* Легенда */}
       <View style={[s.legend, { borderTopColor: colors.border }]}>
@@ -208,10 +218,7 @@ export default function CalendarScreen() {
       <Modal transparent visible={sheetVisible} onRequestClose={closeSheet} animationType="none">
         <TouchableOpacity style={s.backdrop} activeOpacity={1} onPress={closeSheet} />
         <Animated.View
-          style={[
-            s.sheet,
-            { backgroundColor: colors.bg, transform: [{ translateY: slideY }] },
-          ]}
+          style={[s.sheet, { backgroundColor: colors.bg, transform: [{ translateY: slideY }] }]}
         >
           <View style={[s.sheetHandle, { backgroundColor: colors.border }]} />
           <Text style={[s.sheetDate, { color: colors.textPrimary, fontSize: baseSizes.title * scale }]}>
@@ -241,7 +248,9 @@ export default function CalendarScreen() {
   );
 }
 
-function LegendItem({ color, label, textColor, scale }: { color: string; label: string; textColor: string; scale: number }) {
+function LegendItem({ color, label, textColor, scale }: {
+  color: string; label: string; textColor: string; scale: number;
+}) {
   return (
     <View style={s.legendItem}>
       <View style={[s.legendDot, { backgroundColor: color }]} />
@@ -250,24 +259,23 @@ function LegendItem({ color, label, textColor, scale }: { color: string; label: 
   );
 }
 
-function SheetEventRow({ event, colors, scale, t }: { event: IntakeEvent; colors: any; scale: number; t: any }) {
-  const statusLabel = event.status === 'taken'
-    ? t('status_taken')
-    : event.status === 'missed'
-    ? t('status_missed')
-    : t('status_pending');
+function SheetEventRow({ event, colors, scale, t }: {
+  event: IntakeEvent; colors: any; scale: number; t: any;
+}) {
+  const statusLabel =
+    event.status === 'taken' ? t('status_taken') :
+    event.status === 'missed' ? t('status_missed') :
+    t('status_pending');
 
-  const statusColor = event.status === 'taken'
-    ? colors.success
-    : event.status === 'missed'
-    ? colors.danger
-    : colors.warning;
+  const statusColor =
+    event.status === 'taken' ? colors.success :
+    event.status === 'missed' ? colors.danger :
+    colors.warning;
 
-  const badgeBg = event.status === 'taken'
-    ? colors.successLight
-    : event.status === 'missed'
-    ? colors.dangerLight
-    : colors.warningLight;
+  const badgeBg =
+    event.status === 'taken' ? colors.successLight :
+    event.status === 'missed' ? colors.dangerLight :
+    colors.warningLight;
 
   return (
     <View style={[s.sheetRow, { borderColor: colors.border }]}>
@@ -293,7 +301,7 @@ function SheetEventRow({ event, colors, scale, t }: { event: IntakeEvent; colors
 
 const s = StyleSheet.create({
   root: { flex: 1 },
-  heading: { fontWeight: '700', margin: 20, marginBottom: 8 },
+  calendarContainer: { flex: 1 },
   legend: {
     flexDirection: 'row',
     justifyContent: 'center',
