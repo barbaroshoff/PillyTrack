@@ -116,44 +116,6 @@ export default function MedicationDetailsScreen() {
           </View>
         )}
 
-        {/* История */}
-        {history.length > 0 && (
-          <View style={[s.card, { backgroundColor: colors.cardAlt, borderColor: colors.border }]}>
-            <Text style={[s.cardLabel, { color: colors.textSecondary, fontSize: baseSizes.caption * scale }]}>
-              ПОСЛЕДНИЕ ПРИЁМЫ
-            </Text>
-            {history.map((ev) => (
-              <View key={ev.id} style={[s.historyRow, { borderBottomColor: colors.border }]}>
-                <Text style={{ fontSize: 18 }}>
-                  {ev.status === 'taken' ? '✓' : ev.status === 'missed' ? '!' : '○'}
-                </Text>
-                <View style={s.historyInfo}>
-                  <Text style={{ color: colors.textPrimary, fontSize: baseSizes.body * scale }}>
-                    {new Date(ev.scheduled_at).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}
-                  </Text>
-                  <Text style={{ color: colors.textMuted, fontSize: baseSizes.caption * scale }}>
-                    {ev.scheduled_at.slice(11, 16)}
-                  </Text>
-                </View>
-                <Text
-                  style={{
-                    fontSize: baseSizes.caption * scale,
-                    fontWeight: '600',
-                    color:
-                      ev.status === 'taken'
-                        ? colors.success
-                        : ev.status === 'missed'
-                        ? colors.danger
-                        : colors.textMuted,
-                  }}
-                >
-                  {ev.status === 'taken' ? 'Принято' : ev.status === 'missed' ? 'Пропущено' : 'Ожидает'}
-                </Text>
-              </View>
-            ))}
-          </View>
-        )}
-
         {/* Кнопки */}
         <View style={s.actions}>
           <TouchableOpacity
@@ -210,6 +172,44 @@ export default function MedicationDetailsScreen() {
             </Text>
           </TouchableOpacity>
         </View>
+
+        {/* История */}
+        {history.length > 0 && (
+          <View style={[s.card, { backgroundColor: colors.cardAlt, borderColor: colors.border }]}>
+            <Text style={[s.cardLabel, { color: colors.textSecondary, fontSize: baseSizes.caption * scale }]}>
+              ПОСЛЕДНИЕ ПРИЁМЫ
+            </Text>
+            {history.map((ev) => (
+              <View key={ev.id} style={[s.historyRow, { borderBottomColor: colors.border }]}>
+                <Text style={{ fontSize: 18 }}>
+                  {ev.status === 'taken' ? '✓' : ev.status === 'missed' ? '!' : '○'}
+                </Text>
+                <View style={s.historyInfo}>
+                  <Text style={{ color: colors.textPrimary, fontSize: baseSizes.body * scale }}>
+                    {new Date(ev.scheduled_at).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}
+                  </Text>
+                  <Text style={{ color: colors.textMuted, fontSize: baseSizes.caption * scale }}>
+                    {ev.scheduled_at.slice(11, 16)}
+                  </Text>
+                </View>
+                <Text
+                  style={{
+                    fontSize: baseSizes.caption * scale,
+                    fontWeight: '600',
+                    color:
+                      ev.status === 'taken'
+                        ? colors.success
+                        : ev.status === 'missed'
+                        ? colors.danger
+                        : colors.textMuted,
+                  }}
+                >
+                  {ev.status === 'taken' ? 'Принято' : ev.status === 'missed' ? 'Пропущено' : 'Ожидает'}
+                </Text>
+              </View>
+            ))}
+          </View>
+        )}
       </ScrollView>
     </SafeAreaView>
   );

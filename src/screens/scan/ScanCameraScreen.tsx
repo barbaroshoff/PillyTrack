@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   Dimensions,
   Alert,
+  Animated,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CameraView, useCameraPermissions } from 'expo-camera';
@@ -35,13 +36,46 @@ export default function ScanCameraScreen() {
   const [permission, requestPermission] = useCameraPermissions();
   const [processing, setProcessing] = useState(false);
   const cameraRef = useRef<CameraView>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const progress = useRef(new Animated.Value(0)).current;
   const reset = useScanFlowStore((s) => s.reset);
   const setField = useScanFlowStore((s) => s.setField);
 
   React.useEffect(() => { reset(); }, []);
 
+  const AUTO_DELAY = 3000;
+
+  const startAutoCapture = () => {
+    progress.setValue(0);
+    Animated.timing(progress, {
+      toValue: 1,
+      duration: AUTO_DELAY,
+      useNativeDriver: false,
+    }).start(({ finished }) => {
+      if (finished) handleCapture();
+    });
+  };
+
+  const cancelAutoCapture = () => {
+    progress.stopAnimation();
+    progress.setValue(0);
+    if (timerRef.current) clearTimeout(timerRef.current);
+  };
+
+  useEffect(() => {
+    if (permission?.granted && !processing) {
+      const t = setTimeout(startAutoCapture, 800);
+      timerRef.current = t;
+      return () => {
+        clearTimeout(t);
+        cancelAutoCapture();
+      };
+    }
+  }, [permission?.granted]);
+
   const handleCapture = async () => {
     if (processing || !cameraRef.current) return;
+    cancelAutoCapture();
     setProcessing(true);
     try {
       const photo = await cameraRef.current.takePictureAsync({ quality: 0.75 });
@@ -52,8 +86,8 @@ export default function ScanCameraScreen() {
       navigation.navigate('MedicationInfo', { info, photoUri: photo.uri });
     } catch (e: any) {
       Alert.alert('Не удалось распознать', e.message ?? 'Попробуйте ещё раз или введите вручную');
-    } finally {
       setProcessing(false);
+      startAutoCapture();
     }
   };
 
@@ -104,6 +138,18 @@ export default function ScanCameraScreen() {
             <View style={[s.corner, s.tr]} />
             <View style={[s.corner, s.bl]} />
             <View style={[s.corner, s.br]} />
+            {/* Прогресс-бар по нижней границе рамки */}
+            <Animated.View
+              style={[
+                s.progressBar,
+                {
+                  width: progress.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: ['0%', '100%'],
+                  }),
+                },
+              ]}
+            />
           </View>
           <View style={s.overlaySide} />
         </View>
@@ -123,7 +169,7 @@ export default function ScanCameraScreen() {
         {/* Подсказка */}
         <View style={s.hint}>
           <Text style={[s.hintText, { fontSize: baseSizes.caption * scale }]}>
-            Наведите на лицевую сторону упаковки
+            {processing ? 'Распознаём препарат...' : 'Наведите на упаковку — фото сделается само'}
           </Text>
         </View>
 
@@ -163,6 +209,13 @@ const s = StyleSheet.create({
   overlaySide: { flex: 1, backgroundColor: 'rgba(0,0,0,0.58)' },
   overlayBottom: { flex: 1.8, backgroundColor: 'rgba(0,0,0,0.58)' },
 
+  progressBar: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    height: BORDER,
+    backgroundColor: '#4FA8E8',
+  },
   corner: { position: 'absolute', width: CORNER, height: CORNER, borderColor: '#fff' },
   tl: { top: 0, left: 0, borderTopWidth: BORDER, borderLeftWidth: BORDER },
   tr: { top: 0, right: 0, borderTopWidth: BORDER, borderRightWidth: BORDER },

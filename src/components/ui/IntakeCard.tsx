@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
 import { useFontScale } from '../../context/FontScaleContext';
 import { baseSizes } from '../../theme/typography';
@@ -9,6 +9,7 @@ interface Props {
   intake: IntakeEvent;
   onTaken: () => void;
   onSkipped: () => void;
+  onDelete: () => void;
 }
 
 const STATUS_CONFIG = {
@@ -17,7 +18,7 @@ const STATUS_CONFIG = {
   missed: { bg: 'dangerLight', border: 'danger', label: 'Пропущено', labelColor: 'danger' },
 } as const;
 
-export default function IntakeCard({ intake, onTaken, onSkipped }: Props) {
+export default function IntakeCard({ intake, onTaken, onSkipped, onDelete }: Props) {
   const { colors } = useTheme();
   const { scale } = useFontScale();
   const cfg = STATUS_CONFIG[intake.status];
@@ -73,6 +74,18 @@ export default function IntakeCard({ intake, onTaken, onSkipped }: Props) {
             {cfg.label}
           </Text>
         </View>
+
+        <TouchableOpacity
+          style={s.deleteBtn}
+          onPress={() =>
+            Alert.alert('Удалить запись?', 'Приём будет удалён из расписания.', [
+              { text: 'Отмена', style: 'cancel' },
+              { text: 'Удалить', style: 'destructive', onPress: onDelete },
+            ])
+          }
+        >
+          <Text style={{ color: colors.textMuted, fontSize: 18 }}>✕</Text>
+        </TouchableOpacity>
       </View>
 
       {intake.status === 'pending' && (
@@ -118,6 +131,7 @@ const s = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 20,
   },
+  deleteBtn: { padding: 6, marginLeft: 4 },
   actions: { flexDirection: 'row', gap: 10, marginTop: 12 },
   actionBtn: {
     flex: 1,

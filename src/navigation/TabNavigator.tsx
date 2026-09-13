@@ -42,45 +42,50 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const rootNav = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   return (
-    <View style={[s.bar, { backgroundColor: colors.bg, borderTopColor: colors.border }]}>
-      {state.routes.map((route, index) => {
-        const isFocused = state.index === index;
-        const label = TAB_LABELS[route.name as keyof TabParamList];
-        const icon = TAB_ICONS[route.name as keyof TabParamList];
-
-        return (
-          <TouchableOpacity
-            key={route.key}
-            style={s.tabItem}
-            onPress={() => {
-              const event = navigation.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });
-              if (!isFocused && !event.defaultPrevented) navigation.navigate(route.name);
-            }}
-            activeOpacity={0.7}
-          >
-            <Text style={{ fontSize: 22 }}>{icon}</Text>
-            <Text
-              style={{
-                color: isFocused ? colors.accent : colors.textMuted,
-                fontSize: baseSizes.caption * scale,
-                marginTop: 2,
-                fontWeight: isFocused ? '600' : '400',
-              }}
-            >
-              {label}
-            </Text>
-          </TouchableOpacity>
-        );
-      })}
-
-      {/* FAB поверх таб-бара */}
+    <View style={{ backgroundColor: colors.bg, borderTopWidth: 1, borderTopColor: colors.border }}>
+      {/* Полноширокая кнопка сканирования */}
       <TouchableOpacity
-        style={[s.fab, { backgroundColor: colors.accent }]}
+        style={[s.scanBtn, { backgroundColor: colors.accent }]}
         onPress={() => rootNav.navigate('ScanCamera')}
         activeOpacity={0.85}
       >
-        <Text style={s.fabIcon}>+</Text>
+        <Text style={[s.scanBtnText, { fontSize: baseSizes.button * scale }]}>
+          📷  Сфотографировать препарат
+        </Text>
       </TouchableOpacity>
+
+      {/* Таб-бар */}
+      <View style={[s.bar, { paddingBottom: Platform.OS === 'ios' ? 24 : 8 }]}>
+        {state.routes.map((route, index) => {
+          const isFocused = state.index === index;
+          const label = TAB_LABELS[route.name as keyof TabParamList];
+          const icon = TAB_ICONS[route.name as keyof TabParamList];
+
+          return (
+            <TouchableOpacity
+              key={route.key}
+              style={s.tabItem}
+              onPress={() => {
+                const event = navigation.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });
+                if (!isFocused && !event.defaultPrevented) navigation.navigate(route.name);
+              }}
+              activeOpacity={0.7}
+            >
+              <Text style={{ fontSize: 22 }}>{icon}</Text>
+              <Text
+                style={{
+                  color: isFocused ? colors.accent : colors.textMuted,
+                  fontSize: baseSizes.caption * scale,
+                  marginTop: 2,
+                  fontWeight: isFocused ? '600' : '400',
+                }}
+              >
+                {label}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
     </View>
   );
 }
@@ -100,13 +105,25 @@ export default function TabNavigator() {
 }
 
 const s = StyleSheet.create({
+  scanBtn: {
+    marginHorizontal: 16,
+    marginTop: 12,
+    marginBottom: 8,
+    paddingVertical: 14,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 4,
+  },
+  scanBtnText: { color: '#fff', fontWeight: '700' },
   bar: {
     flexDirection: 'row',
-    borderTopWidth: 1,
-    paddingBottom: Platform.OS === 'ios' ? 24 : 8,
-    paddingTop: 8,
+    paddingTop: 4,
     paddingHorizontal: 8,
-    position: 'relative',
   },
   tabItem: {
     flex: 1,
@@ -114,20 +131,4 @@ const s = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 4,
   },
-  fab: {
-    position: 'absolute',
-    right: 16,
-    top: -20,
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    alignItems: 'center',
-    justifyContent: 'center',
-    elevation: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-  },
-  fabIcon: { color: '#fff', fontSize: 28, lineHeight: 32 },
 });

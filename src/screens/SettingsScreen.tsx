@@ -9,6 +9,17 @@ import { setLanguage, getLanguage } from '../i18n';
 import type { FontScaleKey } from '../theme';
 import type { AppLanguage } from '../i18n';
 
+const LANGUAGES: { code: AppLanguage; label: string; flag: string }[] = [
+  { code: 'ru', label: 'Русский', flag: '🇷🇺' },
+  { code: 'en', label: 'English', flag: '🇬🇧' },
+  { code: 'es', label: 'Español', flag: '🇪🇸' },
+  { code: 'fr', label: 'Français', flag: '🇫🇷' },
+  { code: 'de', label: 'Deutsch', flag: '🇩🇪' },
+  { code: 'it', label: 'Italiano', flag: '🇮🇹' },
+  { code: 'pl', label: 'Polski', flag: '🇵🇱' },
+  { code: 'uk', label: 'Українська', flag: '🇺🇦' },
+];
+
 const FONT_PRESETS: { key: FontScaleKey; labelKey: string; aaSize: number }[] = [
   { key: 'normal', labelKey: 'settings_font_normal', aaSize: 20 },
   { key: 'large', labelKey: 'settings_font_large', aaSize: 23 },
@@ -83,30 +94,32 @@ export default function SettingsScreen() {
         <Text style={[s.sectionLabel, { color: colors.textSecondary, fontSize: baseSizes.caption * scale, marginTop: 24 }]}>
           {t('settings_language').toUpperCase()}
         </Text>
-        <View style={s.langRow}>
-          {(['ru', 'en'] as AppLanguage[]).map((lang) => {
-            const active = currentLang === lang;
+        <View style={s.langGrid}>
+          {LANGUAGES.map(({ code, label, flag }) => {
+            const active = currentLang === code;
             return (
               <TouchableOpacity
-                key={lang}
+                key={code}
                 style={[
                   s.langBtn,
                   {
                     backgroundColor: active ? colors.accent : colors.cardAlt,
                     borderColor: active ? colors.accent : colors.border,
-                    flex: 1,
                   },
                 ]}
-                onPress={() => changeLang(lang)}
+                onPress={() => changeLang(code)}
               >
+                <Text style={{ fontSize: 22 }}>{flag}</Text>
                 <Text
                   style={{
                     color: active ? '#fff' : colors.textPrimary,
-                    fontWeight: '700',
-                    fontSize: baseSizes.body * scale,
+                    fontWeight: '600',
+                    fontSize: baseSizes.caption * scale,
+                    marginTop: 4,
+                    textAlign: 'center',
                   }}
                 >
-                  {lang.toUpperCase()}
+                  {label}
                 </Text>
               </TouchableOpacity>
             );
@@ -171,12 +184,14 @@ const s = StyleSheet.create({
     justifyContent: 'center',
     minHeight: 90,
   },
-  langRow: { flexDirection: 'row', gap: 10 },
+  langGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   langBtn: {
     borderRadius: 12,
     borderWidth: 1.5,
     paddingVertical: 12,
+    paddingHorizontal: 8,
     alignItems: 'center',
+    width: '22%',
   },
   card: {
     borderRadius: 16,

@@ -7,6 +7,10 @@ import { useTheme } from '../context/ThemeContext';
 import { useFontScale } from '../context/FontScaleContext';
 import { baseSizes } from '../theme/typography';
 import { useTodayIntakes, useMarkIntake, useIntakesStore } from '../store/intakesStore';
+
+function useDeleteIntake() {
+  return useIntakesStore((s) => s.deleteIntake);
+}
 import IntakeCard from '../components/ui/IntakeCard';
 
 export default function TodayScreen() {
@@ -15,6 +19,7 @@ export default function TodayScreen() {
   const { t } = useTranslation();
   const intakes = useTodayIntakes();
   const markIntake = useMarkIntake();
+  const deleteIntake = useDeleteIntake();
   const loadToday = useIntakesStore((s) => s.loadToday);
   const isFocused = useIsFocused();
 
@@ -43,6 +48,7 @@ export default function TodayScreen() {
               intake={item}
               onTaken={() => markIntake(item.id, 'taken')}
               onSkipped={() => markIntake(item.id, 'missed')}
+              onDelete={() => deleteIntake(item.id)}
             />
           )}
         />

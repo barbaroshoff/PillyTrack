@@ -36,6 +36,11 @@ export async function getIntakesForDate(dateIso: string): Promise<IntakeEvent[]>
   );
 }
 
+export async function deleteIntakeEvent(id: string): Promise<void> {
+  const db = await getDb();
+  await db.runAsync('DELETE FROM intake_events WHERE id = ?', [id]);
+}
+
 export async function markIntakeEvent(id: string, status: IntakeStatus): Promise<void> {
   const db = await getDb();
   await db.runAsync(
@@ -87,7 +92,7 @@ export async function getPendingIntakes(): Promise<IntakeEvent[]> {
 export async function getRecentIntakesByCourse(courseId: string, limit = 5): Promise<IntakeEvent[]> {
   const db = await getDb();
   return db.getAllAsync<IntakeEvent>(
-    `SELECT * FROM intake_events WHERE course_id = ? ORDER BY scheduled_at DESC LIMIT ?`,
+    `SELECT * FROM intake_events WHERE course_id = ? ORDER BY scheduled_at ASC LIMIT ?`,
     [courseId, limit],
   );
 }
