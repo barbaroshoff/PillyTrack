@@ -1,1 +1,1 @@
-export const ANTHROPIC_API_KEY = process.env.EXPO_PUBLIC_ANTHROPIC_API_KEY ?? '';
+export const PROXY_URL = process.env.EXPO_PUBLIC_PROXY_URL ?? '';

@@ -18,7 +18,7 @@ import { useFontScale } from '../../context/FontScaleContext';
 import { baseSizes } from '../../theme/typography';
 import { useScanFlowStore } from '../../store/scanFlowStore';
 import { recognizeMedicationFromPhoto } from '../../services/medicationAI';
-import { ANTHROPIC_API_KEY } from '../../config';
+import { PROXY_URL } from '../../config';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
@@ -50,7 +50,7 @@ export default function ScanCameraScreen() {
       if (!photo) throw new Error(t('scan_error_title'));
 
       setField('photoUri', photo.uri);
-      const info = await recognizeMedicationFromPhoto(photo.uri, ANTHROPIC_API_KEY);
+      const info = await recognizeMedicationFromPhoto(photo.uri, PROXY_URL);
       navigation.navigate('MedicationInfo', { info, photoUri: photo.uri });
     } catch (e: any) {
       Alert.alert(t('scan_error_title'), e.message ?? t('scan_error_body'));
