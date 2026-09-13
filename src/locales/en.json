@@ -98,7 +98,7 @@
   "scan_btn": "📷  Scan medication",
   "scan_photo_title": "Take Photo",
   "scan_processing": "Recognizing medication...",
-  "scan_hint_auto": "Point at the package — photo taken automatically",
+  "scan_hint_auto": "Point at the package and press the button",
   "scan_error_title": "Recognition failed",
   "scan_error_body": "Try again or enter manually",
 

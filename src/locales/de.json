@@ -98,7 +98,7 @@
   "scan_btn": "📷  Medikament fotografieren",
   "scan_photo_title": "Foto aufnehmen",
   "scan_processing": "Medikament wird erkannt...",
-  "scan_hint_auto": "Kamera auf Verpackung richten — Foto wird automatisch gemacht",
+  "scan_hint_auto": "Kamera auf Verpackung richten und Taste drücken",
   "scan_error_title": "Erkennung fehlgeschlagen",
   "scan_error_body": "Erneut versuchen oder manuell eingeben",
 

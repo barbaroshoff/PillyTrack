@@ -98,7 +98,7 @@
   "scan_btn": "📷  Sfotografuj lek",
   "scan_photo_title": "Zrób zdjęcie",
   "scan_processing": "Rozpoznawanie leku...",
-  "scan_hint_auto": "Skieruj na opakowanie — zdjęcie zrobi się samo",
+  "scan_hint_auto": "Skieruj na opakowanie i naciśnij przycisk",
   "scan_error_title": "Nie udało się rozpoznać",
   "scan_error_body": "Spróbuj ponownie lub wpisz ręcznie",
 

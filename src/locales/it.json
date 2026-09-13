@@ -98,7 +98,7 @@
   "scan_btn": "📷  Fotografa il farmaco",
   "scan_photo_title": "Scatta foto",
   "scan_processing": "Riconoscimento in corso...",
-  "scan_hint_auto": "Punta sulla confezione — la foto viene scattata automaticamente",
+  "scan_hint_auto": "Punta sulla confezione e premi il pulsante",
   "scan_error_title": "Riconoscimento fallito",
   "scan_error_body": "Riprova o inserisci manualmente",
 

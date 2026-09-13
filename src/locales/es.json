@@ -98,7 +98,7 @@
   "scan_btn": "📷  Fotografiar medicamento",
   "scan_photo_title": "Tomar foto",
   "scan_processing": "Reconociendo medicamento...",
-  "scan_hint_auto": "Apunta al envase — la foto se toma sola",
+  "scan_hint_auto": "Apunta al envase y pulsa el botón",
   "scan_error_title": "No se pudo reconocer",
   "scan_error_body": "Intenta de nuevo o introduce manualmente",
 
