@@ -14,6 +14,8 @@ export const CREATE_COURSES = `
     medication_id TEXT NOT NULL,
     times_per_day INTEGER NOT NULL DEFAULT 1,
     custom_times TEXT NOT NULL DEFAULT '[]',
+    frequency TEXT NOT NULL DEFAULT 'daily',
+    custom_days TEXT NOT NULL DEFAULT '[]',
     start_date TEXT NOT NULL,
     duration_days INTEGER NOT NULL,
     status TEXT NOT NULL DEFAULT 'active',

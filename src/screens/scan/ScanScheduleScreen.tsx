@@ -17,6 +17,7 @@ import { useFontScale } from '../../context/FontScaleContext';
 import { baseSizes } from '../../theme/typography';
 import { useScanFlowStore } from '../../store/scanFlowStore';
 import { calculateCourse } from '../../services/scheduleEngine';
+import type { Frequency } from '../../services/scheduleEngine';
 import { insertMedication } from '../../db/medications';
 import { scheduleIntakeNotifications } from '../../services/notifications';
 import { insertCourse } from '../../db/courses';
@@ -27,10 +28,28 @@ import type { RootStackParamList } from '../../navigation/RootNavigator';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
-const PRESETS = [
-  { label: '1 раз', times: 1, times_arr: ['08:00'] },
-  { label: '2 раза', times: 2, times_arr: ['08:00', '20:00'] },
-  { label: '3 раза', times: 3, times_arr: ['08:00', '14:00', '20:00'] },
+const TIMES_OPTIONS = [1, 2, 3];
+
+const DEFAULT_TIMES: Record<number, string[]> = {
+  1: ['08:00'],
+  2: ['08:00', '20:00'],
+  3: ['08:00', '14:00', '20:00'],
+};
+
+const FREQUENCY_OPTIONS: { value: Frequency; label: string }[] = [
+  { value: 'daily', label: 'Каждый день' },
+  { value: 'every_other_day', label: 'Через день' },
+  { value: 'custom_days', label: 'Выбрать дни' },
+];
+
+const WEEKDAYS = [
+  { label: 'Пн', value: 1 },
+  { label: 'Вт', value: 2 },
+  { label: 'Ср', value: 3 },
+  { label: 'Чт', value: 4 },
+  { label: 'Пт', value: 5 },
+  { label: 'Сб', value: 6 },
+  { label: 'Вс', value: 0 },
 ];
 
 function timeToDate(t: string): Date {
@@ -52,53 +71,64 @@ export default function ScanScheduleScreen() {
   const loadToday = useIntakesStore((s) => s.loadToday);
 
   const [timesPerDay, setTimesPerDay] = useState(store.timesPerDay);
-  const [customTimes, setCustomTimes] = useState<string[]>(store.customTimes);
-  const [isCustom, setIsCustom] = useState(false);
+  const [times, setTimes] = useState<string[]>(store.customTimes.length > 0 ? store.customTimes : DEFAULT_TIMES[store.timesPerDay] ?? ['08:00']);
+  const [frequency, setFrequency] = useState<Frequency>(store.frequency);
+  const [customDays, setCustomDays] = useState<number[]>(store.customDays);
   const [pickerIndex, setPickerIndex] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
 
+  const currentTimes = times.slice(0, timesPerDay);
+
+  const onChangeTimesPerDay = (n: number) => {
+    setTimesPerDay(n);
+    const defaults = DEFAULT_TIMES[n] ?? ['08:00'];
+    setTimes((prev) => {
+      const next = [...prev];
+      while (next.length < n) next.push(defaults[next.length] ?? '08:00');
+      return next;
+    });
+  };
+
+  const onTimeChange = (idx: number, date?: Date) => {
+    setPickerIndex(null);
+    if (!date) return;
+    setTimes((prev) => {
+      const next = [...prev];
+      next[idx] = dateToTime(date);
+      return next;
+    });
+  };
+
+  const toggleDay = (day: number) => {
+    setCustomDays((prev) =>
+      prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day],
+    );
+  };
+
   const preview = useMemo(() => {
-    const times = isCustom ? customTimes.slice(0, timesPerDay) : PRESETS.find(p => p.times === timesPerDay)?.times_arr ?? ['08:00'];
+    const effectiveDays = frequency === 'custom_days' && customDays.length === 0
+      ? [1, 3, 5]
+      : customDays;
     return calculateCourse({
       courseId: '__preview__',
       pillsPerPack: store.pillsPerPack,
       dosePerDay: store.dosePerDay,
       timesPerDay,
       startDate: new Date(),
-      customTimes: times,
+      customTimes: currentTimes,
+      frequency,
+      customDays: effectiveDays,
     });
-  }, [timesPerDay, customTimes, isCustom, store.pillsPerPack, store.dosePerDay]);
-
-  const selectPreset = (p: typeof PRESETS[0]) => {
-    setIsCustom(false);
-    setTimesPerDay(p.times);
-    setCustomTimes(p.times_arr);
-  };
-
-  const selectCustom = () => {
-    setIsCustom(true);
-    if (customTimes.length !== timesPerDay) {
-      const defaults = ['08:00', '14:00', '20:00', '22:00'];
-      setCustomTimes(defaults.slice(0, timesPerDay));
-    }
-  };
-
-  const onTimeChange = (idx: number, date?: Date) => {
-    setPickerIndex(null);
-    if (!date) return;
-    const updated = [...customTimes];
-    updated[idx] = dateToTime(date);
-    setCustomTimes(updated);
-  };
+  }, [timesPerDay, currentTimes, frequency, customDays, store.pillsPerPack, store.dosePerDay]);
 
   const save = async () => {
     if (saving) return;
+    if (frequency === 'custom_days' && customDays.length === 0) {
+      Alert.alert('Выберите дни', 'Выберите хотя бы один день недели');
+      return;
+    }
     setSaving(true);
     try {
-      const finalTimes = isCustom
-        ? customTimes.slice(0, timesPerDay)
-        : PRESETS.find(p => p.times === timesPerDay)?.times_arr ?? ['08:00'];
-
       const medicationId = store.existingMedicationId ?? generateId();
       const courseId = generateId();
       const startDate = new Date();
@@ -119,14 +149,18 @@ export default function ScanScheduleScreen() {
         dosePerDay: store.dosePerDay,
         timesPerDay,
         startDate,
-        customTimes: finalTimes,
+        customTimes: currentTimes,
+        frequency,
+        customDays,
       });
 
       await insertCourse({
         id: courseId,
         medication_id: medicationId,
         times_per_day: timesPerDay,
-        custom_times: finalTimes,
+        custom_times: currentTimes,
+        frequency,
+        custom_days: customDays,
         start_date: startDate.toISOString().split('T')[0],
         duration_days: durationDays,
         status: 'active',
@@ -135,10 +169,9 @@ export default function ScanScheduleScreen() {
       const eventsWithIds = intakeEvents.map((e) => ({ ...e, id: generateId() }));
       await insertIntakeEvents(eventsWithIds);
       await scheduleIntakeNotifications(store.medicationName, eventsWithIds);
-
       await loadToday();
       navigation.navigate('ScanSuccess');
-    } catch (e) {
+    } catch {
       Alert.alert('Ошибка', 'Не удалось сохранить курс');
       setSaving(false);
     }
@@ -157,60 +190,115 @@ export default function ScanScheduleScreen() {
       </View>
 
       <ScrollView contentContainerStyle={s.scroll}>
+        {/* Сколько раз в день */}
         <Text style={[s.sectionLabel, { color: colors.textSecondary, fontSize: baseSizes.caption * scale }]}>
           СКОЛЬКО РАЗ В ДЕНЬ
         </Text>
-
-        <View style={s.presetRow}>
-          {PRESETS.map((p) => {
-            const active = !isCustom && timesPerDay === p.times;
+        <View style={s.optionRow}>
+          {TIMES_OPTIONS.map((n) => {
+            const active = timesPerDay === n;
             return (
               <TouchableOpacity
-                key={p.times}
-                style={[s.presetBtn, { borderColor: active ? colors.accent : colors.border, backgroundColor: active ? colors.accentLight : colors.cardAlt }]}
-                onPress={() => selectPreset(p)}
+                key={n}
+                style={[s.optionBtn, {
+                  borderColor: active ? colors.accent : colors.border,
+                  backgroundColor: active ? colors.accentLight : colors.cardAlt,
+                  flex: 1,
+                }]}
+                onPress={() => onChangeTimesPerDay(n)}
               >
                 <Text style={{ color: active ? colors.accentDark : colors.textPrimary, fontWeight: '600', fontSize: baseSizes.body * scale }}>
-                  {p.label}
+                  {n === 1 ? '1 раз' : n === 2 ? '2 раза' : '3 раза'}
                 </Text>
               </TouchableOpacity>
             );
           })}
-          <TouchableOpacity
-            style={[s.presetBtn, { borderColor: isCustom ? colors.accent : colors.border, backgroundColor: isCustom ? colors.accentLight : colors.cardAlt }]}
-            onPress={selectCustom}
-          >
-            <Text style={{ color: isCustom ? colors.accentDark : colors.textPrimary, fontWeight: '600', fontSize: baseSizes.body * scale }}>
-              Своё
-            </Text>
-          </TouchableOpacity>
         </View>
 
-        {isCustom && (
-          <View style={[s.card, { backgroundColor: colors.cardAlt, borderColor: colors.border }]}>
-            <Text style={[s.sectionLabel, { color: colors.textSecondary, fontSize: baseSizes.caption * scale }]}>
-              ВРЕМЯ ПРИЁМА
-            </Text>
-            {customTimes.slice(0, timesPerDay).map((t, i) => (
+        {/* Время приёма — всегда видно */}
+        <Text style={[s.sectionLabel, { color: colors.textSecondary, fontSize: baseSizes.caption * scale }]}>
+          ВРЕМЯ ПРИЁМА
+        </Text>
+        <View style={[s.card, { backgroundColor: colors.cardAlt, borderColor: colors.border }]}>
+          {currentTimes.map((t, i) => (
+            <TouchableOpacity
+              key={i}
+              style={[s.timeRow, { borderBottomColor: colors.border, borderBottomWidth: i < currentTimes.length - 1 ? 1 : 0 }]}
+              onPress={() => setPickerIndex(i)}
+            >
+              <Text style={{ color: colors.textPrimary, fontSize: baseSizes.body * scale }}>
+                Приём {i + 1}
+              </Text>
+              <Text style={{ color: colors.accent, fontWeight: '700', fontSize: baseSizes.title * scale }}>
+                {t}
+              </Text>
+            </TouchableOpacity>
+          ))}
+          {pickerIndex !== null && (
+            <DateTimePicker
+              mode="time"
+              value={timeToDate(times[pickerIndex] ?? '08:00')}
+              is24Hour
+              display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+              onChange={(_, date) => onTimeChange(pickerIndex, date)}
+            />
+          )}
+        </View>
+
+        {/* Частота */}
+        <Text style={[s.sectionLabel, { color: colors.textSecondary, fontSize: baseSizes.caption * scale }]}>
+          ЧАСТОТА ПРИЁМА
+        </Text>
+        <View style={s.optionRow}>
+          {FREQUENCY_OPTIONS.map(({ value, label }) => {
+            const active = frequency === value;
+            return (
               <TouchableOpacity
-                key={i}
-                style={[s.timeRow, { borderBottomColor: colors.border }]}
-                onPress={() => setPickerIndex(i)}
+                key={value}
+                style={[s.optionBtn, {
+                  borderColor: active ? colors.accent : colors.border,
+                  backgroundColor: active ? colors.accentLight : colors.cardAlt,
+                  flex: 1,
+                }]}
+                onPress={() => setFrequency(value)}
               >
-                <Text style={{ color: colors.textPrimary, fontSize: baseSizes.body * scale }}>Приём {i + 1}</Text>
-                <Text style={{ color: colors.accent, fontWeight: '700', fontSize: baseSizes.title * scale }}>
-                  {t}
+                <Text style={{ color: active ? colors.accentDark : colors.textPrimary, fontWeight: '600', fontSize: baseSizes.caption * scale, textAlign: 'center' }}>
+                  {label}
                 </Text>
               </TouchableOpacity>
-            ))}
-            {pickerIndex !== null && (
-              <DateTimePicker
-                mode="time"
-                value={timeToDate(customTimes[pickerIndex] ?? '08:00')}
-                is24Hour
-                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                onChange={(_, date) => onTimeChange(pickerIndex, date)}
-              />
+            );
+          })}
+        </View>
+
+        {/* Выбор дней недели */}
+        {frequency === 'custom_days' && (
+          <View style={[s.card, { backgroundColor: colors.cardAlt, borderColor: colors.border }]}>
+            <Text style={[s.sectionLabel, { color: colors.textSecondary, fontSize: baseSizes.caption * scale, marginBottom: 12 }]}>
+              ДНИ НЕДЕЛИ
+            </Text>
+            <View style={s.daysRow}>
+              {WEEKDAYS.map(({ label, value }) => {
+                const active = customDays.includes(value);
+                return (
+                  <TouchableOpacity
+                    key={value}
+                    style={[s.dayBtn, {
+                      backgroundColor: active ? colors.accent : colors.bg,
+                      borderColor: active ? colors.accent : colors.border,
+                    }]}
+                    onPress={() => toggleDay(value)}
+                  >
+                    <Text style={{ color: active ? '#fff' : colors.textSecondary, fontWeight: '600', fontSize: baseSizes.caption * scale }}>
+                      {label}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+            {customDays.length === 0 && (
+              <Text style={{ color: colors.danger, fontSize: baseSizes.caption * scale, marginTop: 8 }}>
+                Выберите хотя бы один день
+              </Text>
             )}
           </View>
         )}
@@ -223,8 +311,12 @@ export default function ScanScheduleScreen() {
           <Text style={[s.previewDays, { color: colors.accentDark, fontSize: baseSizes.title * scale * 1.3 }]}>
             {preview.durationDays} дней
           </Text>
-          <Text style={{ color: colors.textSecondary, fontSize: baseSizes.caption * scale }}>
+          <Text style={{ color: colors.textSecondary, fontSize: baseSizes.caption * scale, textAlign: 'center' }}>
             {store.pillsPerPack} таблеток · {timesPerDay}× в день
+            {frequency === 'every_other_day' ? ' · через день' : ''}
+            {frequency === 'custom_days' && customDays.length > 0
+              ? ` · ${customDays.length} дн/нед`
+              : ''}
           </Text>
         </View>
 
@@ -246,17 +338,25 @@ const s = StyleSheet.create({
   root: { flex: 1 },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16 },
   title: { fontWeight: '700' },
-  scroll: { padding: 16, gap: 12 },
-  sectionLabel: { fontWeight: '600', letterSpacing: 0.5, marginBottom: 8 },
-  presetRow: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
-  presetBtn: { paddingHorizontal: 18, paddingVertical: 10, borderRadius: 20, borderWidth: 1.5 },
-  card: { borderRadius: 16, borderWidth: 1, padding: 14, gap: 4 },
+  scroll: { padding: 16, gap: 14 },
+  sectionLabel: { fontWeight: '600', letterSpacing: 0.5 },
+  optionRow: { flexDirection: 'row', gap: 8 },
+  optionBtn: { paddingVertical: 12, paddingHorizontal: 8, borderRadius: 12, borderWidth: 1.5, alignItems: 'center' },
+  card: { borderRadius: 16, borderWidth: 1, padding: 14 },
   timeRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingVertical: 12,
-    borderBottomWidth: 1,
+  },
+  daysRow: { flexDirection: 'row', gap: 6, flexWrap: 'wrap' },
+  dayBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 1.5,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   preview: {
     borderRadius: 16,
@@ -264,10 +364,9 @@ const s = StyleSheet.create({
     padding: 16,
     alignItems: 'center',
     gap: 4,
-    marginTop: 8,
   },
   previewLabel: { fontWeight: '600', letterSpacing: 0.5 },
   previewDays: { fontWeight: '800' },
-  saveBtn: { marginTop: 8, padding: 16, borderRadius: 14, alignItems: 'center' },
+  saveBtn: { padding: 16, borderRadius: 14, alignItems: 'center' },
   saveBtnText: { color: '#fff', fontWeight: '600' },
 });

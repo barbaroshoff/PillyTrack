@@ -78,6 +78,8 @@ export default function RenewCourseScreen() {
         timesPerDay: course.times_per_day,
         startDate,
         customTimes: course.custom_times,
+        frequency: course.frequency,
+        customDays: course.custom_days,
       });
 
       await insertCourse({
@@ -85,6 +87,8 @@ export default function RenewCourseScreen() {
         medication_id: medication.id,
         times_per_day: course.times_per_day,
         custom_times: course.custom_times,
+        frequency: course.frequency,
+        custom_days: course.custom_days,
         start_date: startDate.toISOString().split('T')[0],
         duration_days: durationDays,
         status: 'active',

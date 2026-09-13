@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AppState } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import { ThemeProvider } from './src/context/ThemeContext';
@@ -27,9 +27,10 @@ function AppInit() {
   const loadToday = useIntakesStore((s) => s.loadToday);
   const appState = useRef(AppState.currentState);
   const { accepted, accept } = useDisclaimerState();
+  const [i18nReady, setI18nReady] = useState(false);
 
   useEffect(() => {
-    initI18n();
+    initI18n().then(() => setI18nReady(true));
     setupNotificationCategories();
     loadToday();
 
@@ -51,6 +52,8 @@ function AppInit() {
       appStateSub.remove();
     };
   }, [loadToday]);
+
+  if (!i18nReady) return null;
 
   return (
     <>

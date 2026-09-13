@@ -28,12 +28,10 @@ export async function getMedicationById(id: string): Promise<Medication | null> 
 
 export async function deleteMedication(id: string): Promise<void> {
   const db = await getDb();
-  await db.withTransactionAsync(async () => {
-    await db.runAsync(
-      `DELETE FROM intake_events WHERE course_id IN (SELECT id FROM courses WHERE medication_id = ?)`,
-      [id],
-    );
-    await db.runAsync('DELETE FROM courses WHERE medication_id = ?', [id]);
-    await db.runAsync('DELETE FROM medications WHERE id = ?', [id]);
-  });
+  await db.runAsync(
+    `DELETE FROM intake_events WHERE course_id IN (SELECT id FROM courses WHERE medication_id = ?)`,
+    [id],
+  );
+  await db.runAsync('DELETE FROM courses WHERE medication_id = ?', [id]);
+  await db.runAsync('DELETE FROM medications WHERE id = ?', [id]);
 }

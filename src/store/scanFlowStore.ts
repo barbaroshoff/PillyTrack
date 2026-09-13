@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import type { Frequency } from '../services/scheduleEngine';
 
 interface ScanFlowState {
   medicationName: string;
@@ -8,6 +9,8 @@ interface ScanFlowState {
   timesPerDay: number;
   customTimes: string[];
   dosePerDay: number;
+  frequency: Frequency;
+  customDays: number[];
   existingMedicationId: string | null;
   existingCourseId: string | null;
 
@@ -26,6 +29,8 @@ const INITIAL: Omit<ScanFlowState, 'setField' | 'reset'> = {
   timesPerDay: 1,
   customTimes: ['08:00'],
   dosePerDay: 1,
+  frequency: 'daily',
+  customDays: [],
   existingMedicationId: null,
   existingCourseId: null,
 };

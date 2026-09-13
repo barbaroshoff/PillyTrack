@@ -1,11 +1,12 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useIsFocused } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 import { useFontScale } from '../context/FontScaleContext';
 import { baseSizes } from '../theme/typography';
-import { useTodayIntakes, useMarkIntake } from '../store/intakesStore';
+import { useTodayIntakes, useMarkIntake, useIntakesStore } from '../store/intakesStore';
 import IntakeCard from '../components/ui/IntakeCard';
 
 export default function TodayScreen() {
@@ -14,6 +15,12 @@ export default function TodayScreen() {
   const { t } = useTranslation();
   const intakes = useTodayIntakes();
   const markIntake = useMarkIntake();
+  const loadToday = useIntakesStore((s) => s.loadToday);
+  const isFocused = useIsFocused();
+
+  useEffect(() => {
+    if (isFocused) loadToday();
+  }, [isFocused, loadToday]);
 
   const allDone = intakes.length > 0 && intakes.every((i) => i.status === 'taken');
   const empty = intakes.length === 0;

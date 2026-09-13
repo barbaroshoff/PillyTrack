@@ -45,3 +45,4 @@ google-play-service-account.json
 *.mobileprovision
 *.p12
 credentials.json
+.env

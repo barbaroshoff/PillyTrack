@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Dimensions,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CameraView, useCameraPermissions } from 'expo-camera';
@@ -14,54 +15,54 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useTheme } from '../../context/ThemeContext';
 import { useFontScale } from '../../context/FontScaleContext';
 import { baseSizes } from '../../theme/typography';
-import { lookupBarcode } from '../../services/barcode';
 import { useScanFlowStore } from '../../store/scanFlowStore';
+import { recognizeMedicationFromPhoto } from '../../services/medicationAI';
+import { ANTHROPIC_API_KEY } from '../../config';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
 const { width } = Dimensions.get('window');
-const FRAME = width * 0.7;
+const FRAME_W = width * 0.82;
+const FRAME_H = FRAME_W * 0.6;
+const CORNER = 22;
+const BORDER = 3;
 
 export default function ScanCameraScreen() {
   const { colors } = useTheme();
   const { scale } = useFontScale();
   const navigation = useNavigation<Nav>();
   const [permission, requestPermission] = useCameraPermissions();
-  const [scanning, setScanning] = useState(true);
+  const [processing, setProcessing] = useState(false);
+  const cameraRef = useRef<CameraView>(null);
   const reset = useScanFlowStore((s) => s.reset);
   const setField = useScanFlowStore((s) => s.setField);
 
   React.useEffect(() => { reset(); }, []);
 
-  const handleBarcode = useCallback(
-    async (result: { data: string }) => {
-      if (!scanning) return;
-      setScanning(false);
+  const handleCapture = async () => {
+    if (processing || !cameraRef.current) return;
+    setProcessing(true);
+    try {
+      const photo = await cameraRef.current.takePictureAsync({ quality: 0.75 });
+      if (!photo) throw new Error('Не удалось сделать фото');
 
-      const barcode = result.data;
-      const existing = await lookupBarcode(barcode);
-
-      if (existing) {
-        setField('existingMedicationId', existing.id);
-        navigation.replace('RenewCourse', { medicationId: existing.id });
-      } else {
-        setField('barcode', barcode);
-        navigation.navigate('ScanConfirm', { barcode });
-      }
-    },
-    [scanning],
-  );
-
-  const goManual = () => {
-    setScanning(false);
-    navigation.navigate('ScanConfirm', {});
+      setField('photoUri', photo.uri);
+      const info = await recognizeMedicationFromPhoto(photo.uri, ANTHROPIC_API_KEY);
+      navigation.navigate('MedicationInfo', { info, photoUri: photo.uri });
+    } catch (e: any) {
+      Alert.alert('Не удалось распознать', e.message ?? 'Попробуйте ещё раз или введите вручную');
+    } finally {
+      setProcessing(false);
+    }
   };
+
+  const goManual = () => navigation.navigate('ScanConfirm', {});
 
   if (!permission) {
     return (
-      <View style={s.center}>
-        <ActivityIndicator color={colors.accent} />
+      <View style={[s.center, { backgroundColor: '#000' }]}>
+        <ActivityIndicator color="#fff" />
       </View>
     );
   }
@@ -91,20 +92,14 @@ export default function ScanCameraScreen() {
 
   return (
     <View style={s.root}>
-      <CameraView
-        style={StyleSheet.absoluteFill}
-        onBarcodeScanned={scanning ? handleBarcode : undefined}
-        barcodeScannerSettings={{
-          barcodeTypes: ['ean13', 'ean8', 'upc_a', 'upc_e', 'code128', 'code39'],
-        }}
-      />
+      <CameraView ref={cameraRef} style={StyleSheet.absoluteFill} />
 
-      {/* тёмный оверлей с вырезом */}
-      <View style={s.overlay}>
+      {/* Затемнённый оверлей с вырезом под упаковку */}
+      <View style={StyleSheet.absoluteFill} pointerEvents="none">
         <View style={s.overlayTop} />
         <View style={s.overlayRow}>
           <View style={s.overlaySide} />
-          <View style={[s.frame, { width: FRAME, height: FRAME }]}>
+          <View style={{ width: FRAME_W, height: FRAME_H }}>
             <View style={[s.corner, s.tl]} />
             <View style={[s.corner, s.tr]} />
             <View style={[s.corner, s.bl]} />
@@ -115,32 +110,45 @@ export default function ScanCameraScreen() {
         <View style={s.overlayBottom} />
       </View>
 
-      {/* UI поверх */}
       <SafeAreaView style={s.ui} edges={['top', 'bottom']}>
+        {/* Шапка */}
         <View style={s.header}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <Text style={[s.cancel, { fontSize: baseSizes.body * scale }]}>Отмена</Text>
           </TouchableOpacity>
-          <Text style={[s.title, { fontSize: baseSizes.title * scale }]}>Сканировать</Text>
+          <Text style={[s.title, { fontSize: baseSizes.title * scale }]}>Сфотографировать</Text>
           <View style={{ width: 70 }} />
         </View>
 
+        {/* Подсказка */}
         <View style={s.hint}>
           <Text style={[s.hintText, { fontSize: baseSizes.caption * scale }]}>
-            Наведите камеру на штрихкод упаковки
+            Наведите на лицевую сторону упаковки
           </Text>
         </View>
 
-        <TouchableOpacity style={[s.manualBtn, { backgroundColor: 'rgba(255,255,255,0.15)' }]} onPress={goManual}>
-          <Text style={[s.manualText, { fontSize: baseSizes.button * scale }]}>Ввести вручную</Text>
-        </TouchableOpacity>
+        {/* Нижняя панель */}
+        <View style={s.bottom}>
+          <TouchableOpacity onPress={goManual} style={s.manualWrap}>
+            <Text style={[s.manualText, { fontSize: baseSizes.caption * scale }]}>
+              Ввести{'\n'}вручную
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={s.captureBtn} onPress={handleCapture} disabled={processing}>
+            {processing ? (
+              <ActivityIndicator color="#fff" size="large" />
+            ) : (
+              <View style={s.captureInner} />
+            )}
+          </TouchableOpacity>
+
+          <View style={{ width: 64 }} />
+        </View>
       </SafeAreaView>
     </View>
   );
 }
-
-const CORNER = 20;
-const BORDER = 3;
 
 const s = StyleSheet.create({
   root: { flex: 1, backgroundColor: '#000' },
@@ -150,12 +158,10 @@ const s = StyleSheet.create({
   btnText: { color: '#fff', fontWeight: '600' },
   textBtn: { marginTop: 8 },
 
-  overlay: { ...StyleSheet.absoluteFill },
-  overlayTop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)' },
-  overlayRow: { flexDirection: 'row' },
-  overlaySide: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)' },
-  overlayBottom: { flex: 1.5, backgroundColor: 'rgba(0,0,0,0.6)' },
-  frame: { position: 'relative' },
+  overlayTop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.58)' },
+  overlayRow: { flexDirection: 'row', height: FRAME_H },
+  overlaySide: { flex: 1, backgroundColor: 'rgba(0,0,0,0.58)' },
+  overlayBottom: { flex: 1.8, backgroundColor: 'rgba(0,0,0,0.58)' },
 
   corner: { position: 'absolute', width: CORNER, height: CORNER, borderColor: '#fff' },
   tl: { top: 0, left: 0, borderTopWidth: BORDER, borderLeftWidth: BORDER },
@@ -168,21 +174,44 @@ const s = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
     paddingTop: 8,
   },
   cancel: { color: '#fff' },
   title: { color: '#fff', fontWeight: '700' },
-  hint: { alignItems: 'center' },
-  hintText: { color: 'rgba(255,255,255,0.85)', textAlign: 'center' },
-  manualBtn: {
-    marginHorizontal: 32,
-    marginBottom: 16,
-    padding: 16,
-    borderRadius: 14,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.3)',
+  hint: { alignItems: 'center', paddingHorizontal: 32 },
+  hintText: {
+    color: 'rgba(255,255,255,0.85)',
+    textAlign: 'center',
+    backgroundColor: 'rgba(0,0,0,0.35)',
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    borderRadius: 20,
+    overflow: 'hidden',
   },
-  manualText: { color: '#fff', fontWeight: '500' },
+  bottom: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 28,
+    paddingBottom: 24,
+  },
+  manualWrap: { width: 64, alignItems: 'center' },
+  manualText: { color: 'rgba(255,255,255,0.75)', textAlign: 'center', lineHeight: 18 },
+  captureBtn: {
+    width: 76,
+    height: 76,
+    borderRadius: 38,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    borderWidth: 3,
+    borderColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  captureInner: {
+    width: 58,
+    height: 58,
+    borderRadius: 29,
+    backgroundColor: '#fff',
+  },
 });
