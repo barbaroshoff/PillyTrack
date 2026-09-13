@@ -72,16 +72,11 @@ function buildMarkedDates(
           backgroundColor: bg,
           borderWidth: 1.5,
           borderColor,
-          borderRadius: 20,
-          width: 36,
-          height: 36,
-          alignItems: 'center',
-          justifyContent: 'center',
+          borderRadius: 18,
         },
         text: {
           color: textColor,
           fontWeight: (allTaken || date === selectedDate) ? '700' : '400',
-          marginTop: 0,
         },
       },
     };
@@ -95,13 +90,9 @@ function buildMarkedDates(
           backgroundColor: colors.accent,
           borderWidth: 1.5,
           borderColor: colors.accent,
-          borderRadius: 20,
-          width: 36,
-          height: 36,
-          alignItems: 'center',
-          justifyContent: 'center',
+          borderRadius: 18,
         },
-        text: { color: '#fff', fontWeight: '700', marginTop: 0 },
+        text: { color: '#fff', fontWeight: '700' },
       },
     };
   }
@@ -164,12 +155,15 @@ export default function CalendarScreen() {
 
   return (
     <SafeAreaView style={[s.root, { backgroundColor: colors.bg }]} edges={['top']}>
+      <Text style={[s.heading, { color: colors.textPrimary, fontSize: baseSizes.title * scale }]}>
+        {t('calendar')}
+      </Text>
+
       <Calendar
         markingType="custom"
         markedDates={markedDates}
         onDayPress={onDayPress}
         onMonthChange={onMonthChange}
-        style={s.calendar}
         theme={{
           backgroundColor: colors.bg,
           calendarBackground: colors.bg,
@@ -282,9 +276,7 @@ function SheetEventRow({ event, colors, scale, t }: { event: IntakeEvent; colors
 
 const s = StyleSheet.create({
   root: { flex: 1 },
-  calendar: {
-    flex: 1,
-  },
+  heading: { fontWeight: '700', margin: 20, marginBottom: 8 },
   legend: {
     flexDirection: 'row',
     justifyContent: 'center',
