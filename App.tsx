@@ -1,29 +1,18 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
-import { ThemeProvider, useTheme } from './src/context/ThemeContext';
+import { useEffect } from 'react';
+import { ThemeProvider } from './src/context/ThemeContext';
+import RootNavigator from './src/navigation/RootNavigator';
+import { useIntakesStore } from './src/store/intakesStore';
 
-function AppContent() {
-  const { colors } = useTheme();
-  return (
-    <View style={[styles.container, { backgroundColor: colors.bg }]}>
-      <Text style={{ color: colors.textPrimary }}>PillyTrack</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
+function AppInit() {
+  const loadToday = useIntakesStore((s) => s.loadToday);
+  useEffect(() => { loadToday(); }, [loadToday]);
+  return <RootNavigator />;
 }
 
 export default function App() {
   return (
     <ThemeProvider>
-      <AppContent />
+      <AppInit />
     </ThemeProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
