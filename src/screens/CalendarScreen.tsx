@@ -112,6 +112,7 @@ export default function CalendarScreen() {
   const [sheetVisible, setSheetVisible] = useState(false);
   const [cellSize, setCellSize] = useState(40);
   const slideY = useRef(new Animated.Value(400)).current;
+  const closingRef = useRef(false);
   const isFocused = useIsFocused();
 
   const load = useCallback(async (month: string) => {
@@ -134,14 +135,18 @@ export default function CalendarScreen() {
   );
 
   const openSheet = () => {
+    closingRef.current = false;
+    slideY.stopAnimation();
+    slideY.setValue(400);
     setSheetVisible(true);
-    Animated.spring(slideY, { toValue: 0, useNativeDriver: true, tension: 80, friction: 12 }).start();
+    Animated.timing(slideY, { toValue: 0, duration: 260, useNativeDriver: true }).start();
   };
 
   const closeSheet = () => {
-    Animated.timing(slideY, { toValue: 400, duration: 220, useNativeDriver: true }).start(() =>
-      setSheetVisible(false),
-    );
+    closingRef.current = true;
+    Animated.timing(slideY, { toValue: 400, duration: 200, useNativeDriver: true }).start(({ finished }) => {
+      if (finished && closingRef.current) setSheetVisible(false);
+    });
   };
 
   const onDayPress = (day: DateData) => {
