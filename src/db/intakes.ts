@@ -37,3 +37,31 @@ export async function markIntakeEvent(id: string, status: IntakeStatus): Promise
     [status, new Date().toISOString(), id],
   );
 }
+
+export interface IntakeStats {
+  total: number;
+  taken: number;
+  missed: number;
+}
+
+export async function getIntakeStatsByCourse(courseId: string): Promise<IntakeStats> {
+  const db = await getDb();
+  const rows = await db.getAllAsync<{ status: IntakeStatus; cnt: number }>(
+    `SELECT status, COUNT(*) as cnt FROM intake_events WHERE course_id = ? GROUP BY status`,
+    [courseId],
+  );
+  const map = Object.fromEntries(rows.map((r) => [r.status, r.cnt]));
+  return {
+    total: rows.reduce((s, r) => s + r.cnt, 0),
+    taken: map['taken'] ?? 0,
+    missed: map['missed'] ?? 0,
+  };
+}
+
+export async function getRecentIntakesByCourse(courseId: string, limit = 5): Promise<IntakeEvent[]> {
+  const db = await getDb();
+  return db.getAllAsync<IntakeEvent>(
+    `SELECT * FROM intake_events WHERE course_id = ? ORDER BY scheduled_at DESC LIMIT ?`,
+    [courseId, limit],
+  );
+}

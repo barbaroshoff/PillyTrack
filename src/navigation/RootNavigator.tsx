@@ -12,10 +12,10 @@ import MedicationDetailsScreen from '../screens/MedicationDetailsScreen';
 export type RootStackParamList = {
   Tabs: undefined;
   ScanCamera: undefined;
-  ScanConfirm: { medicationId: string };
-  ScanSchedule: { medicationId: string };
+  ScanConfirm: { barcode?: string };
+  ScanSchedule: undefined;
   ScanSuccess: undefined;
-  RenewCourse: { courseId: string };
+  RenewCourse: { medicationId: string; courseId?: string };
   MedicationDetails: { medicationId: string };
 };
 
