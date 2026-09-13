@@ -19,7 +19,7 @@ import { getCourseByMedicationId, updateCourseStatus } from '../db/courses';
 import { useScanFlowStore } from '../store/scanFlowStore';
 import { useIntakesStore } from '../store/intakesStore';
 import { cancelNotificationsForMedication } from '../services/notifications';
-import { getIntakeStatsByCourse, getRecentIntakesByCourse } from '../db/intakes';
+import { getIntakeStatsByCourse, getRecentIntakesByCourse, deletePendingIntakesByCourse } from '../db/intakes';
 import type { Medication } from '../db/medications';
 import type { Course } from '../db/courses';
 import type { IntakeEvent, IntakeStats } from '../db/intakes';
@@ -136,7 +136,10 @@ export default function MedicationDetailsScreen() {
             style={[s.actionBtn, { backgroundColor: colors.cardAlt, borderWidth: 1, borderColor: colors.border }]}
             onPress={async () => {
               await cancelNotificationsForMedication(medication.id);
-              if (course) await updateCourseStatus(course.id, 'completed');
+              if (course) {
+                await updateCourseStatus(course.id, 'completed');
+                await deletePendingIntakesByCourse(course.id);
+              }
               resetScan();
               setScanField('medicationName', medication.name);
               setScanField('pillsPerPack', medication.pills_per_pack);

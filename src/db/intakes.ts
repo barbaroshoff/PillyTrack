@@ -77,8 +77,17 @@ export async function getIntakesForMonth(yearMonth: string): Promise<IntakeEvent
      JOIN courses c ON ie.course_id = c.id
      JOIN medications m ON c.medication_id = m.id
      WHERE ie.scheduled_at LIKE ?
+       AND (c.status = 'active' OR ie.status != 'pending')
      ORDER BY ie.scheduled_at`,
     [`${yearMonth}%`],
+  );
+}
+
+export async function deletePendingIntakesByCourse(courseId: string): Promise<void> {
+  const db = await getDb();
+  await db.runAsync(
+    `DELETE FROM intake_events WHERE course_id = ? AND status = 'pending'`,
+    [courseId],
   );
 }
 
