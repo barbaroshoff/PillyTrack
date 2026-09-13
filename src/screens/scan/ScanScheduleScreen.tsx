@@ -12,6 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import { useFontScale } from '../../context/FontScaleContext';
 import { baseSizes } from '../../theme/typography';
@@ -36,20 +37,14 @@ const DEFAULT_TIMES: Record<number, string[]> = {
   3: ['08:00', '14:00', '20:00'],
 };
 
-const FREQUENCY_OPTIONS: { value: Frequency; label: string }[] = [
-  { value: 'daily', label: 'Каждый день' },
-  { value: 'every_other_day', label: 'Через день' },
-  { value: 'custom_days', label: 'Выбрать дни' },
-];
-
-const WEEKDAYS = [
-  { label: 'Пн', value: 1 },
-  { label: 'Вт', value: 2 },
-  { label: 'Ср', value: 3 },
-  { label: 'Чт', value: 4 },
-  { label: 'Пт', value: 5 },
-  { label: 'Сб', value: 6 },
-  { label: 'Вс', value: 0 },
+const WEEKDAY_KEYS = [
+  { key: 'wd_mon', value: 1 },
+  { key: 'wd_tue', value: 2 },
+  { key: 'wd_wed', value: 3 },
+  { key: 'wd_thu', value: 4 },
+  { key: 'wd_fri', value: 5 },
+  { key: 'wd_sat', value: 6 },
+  { key: 'wd_sun', value: 0 },
 ];
 
 function timeToDate(t: string): Date {
@@ -66,6 +61,7 @@ function dateToTime(d: Date): string {
 export default function ScanScheduleScreen() {
   const { colors } = useTheme();
   const { scale } = useFontScale();
+  const { t, i18n } = useTranslation();
   const navigation = useNavigation<Nav>();
   const store = useScanFlowStore();
   const loadToday = useIntakesStore((s) => s.loadToday);
@@ -76,6 +72,18 @@ export default function ScanScheduleScreen() {
   const [customDays, setCustomDays] = useState<number[]>(store.customDays);
   const [pickerIndex, setPickerIndex] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
+
+  const FREQUENCY_OPTIONS: { value: Frequency; labelKey: string }[] = [
+    { value: 'daily', labelKey: 'schedule_freq_daily' },
+    { value: 'every_other_day', labelKey: 'schedule_freq_other' },
+    { value: 'custom_days', labelKey: 'schedule_freq_custom' },
+  ];
+
+  const TIMES_LABELS: Record<number, string> = {
+    1: t('schedule_1x'),
+    2: t('schedule_2x'),
+    3: t('schedule_3x'),
+  };
 
   const currentTimes = times.slice(0, timesPerDay);
 
@@ -124,7 +132,7 @@ export default function ScanScheduleScreen() {
   const save = async () => {
     if (saving) return;
     if (frequency === 'custom_days' && customDays.length === 0) {
-      Alert.alert('Выберите дни', 'Выберите хотя бы один день недели');
+      Alert.alert(t('schedule_days_alert_title'), t('schedule_days_alert_body'));
       return;
     }
     setSaving(true);
@@ -172,19 +180,25 @@ export default function ScanScheduleScreen() {
       await loadToday();
       navigation.navigate('ScanSuccess');
     } catch {
-      Alert.alert('Ошибка', 'Не удалось сохранить курс');
+      Alert.alert(t('error'), t('schedule_error'));
       setSaving(false);
     }
   };
+
+  const previewSuffix = frequency === 'every_other_day'
+    ? ` · ${t('schedule_preview_other_day')}`
+    : frequency === 'custom_days' && customDays.length > 0
+    ? ` · ${i18n.t('schedule_preview_custom_days', { n: customDays.length })}`
+    : '';
 
   return (
     <SafeAreaView style={[s.root, { backgroundColor: colors.bg }]}>
       <View style={s.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={{ color: colors.accent, fontSize: baseSizes.body * scale }}>Назад</Text>
+          <Text style={{ color: colors.accent, fontSize: baseSizes.body * scale }}>{t('back')}</Text>
         </TouchableOpacity>
         <Text style={[s.title, { color: colors.textPrimary, fontSize: baseSizes.title * scale }]}>
-          Расписание
+          {t('schedule_title')}
         </Text>
         <View style={{ width: 60 }} />
       </View>
@@ -192,7 +206,7 @@ export default function ScanScheduleScreen() {
       <ScrollView contentContainerStyle={s.scroll}>
         {/* Сколько раз в день */}
         <Text style={[s.sectionLabel, { color: colors.textSecondary, fontSize: baseSizes.caption * scale }]}>
-          СКОЛЬКО РАЗ В ДЕНЬ
+          {t('schedule_times_label')}
         </Text>
         <View style={s.optionRow}>
           {TIMES_OPTIONS.map((n) => {
@@ -208,29 +222,29 @@ export default function ScanScheduleScreen() {
                 onPress={() => onChangeTimesPerDay(n)}
               >
                 <Text style={{ color: active ? colors.accentDark : colors.textPrimary, fontWeight: '600', fontSize: baseSizes.body * scale }}>
-                  {n === 1 ? '1 раз' : n === 2 ? '2 раза' : '3 раза'}
+                  {TIMES_LABELS[n]}
                 </Text>
               </TouchableOpacity>
             );
           })}
         </View>
 
-        {/* Время приёма — всегда видно */}
+        {/* Время приёма */}
         <Text style={[s.sectionLabel, { color: colors.textSecondary, fontSize: baseSizes.caption * scale }]}>
-          ВРЕМЯ ПРИЁМА
+          {t('schedule_time_label')}
         </Text>
         <View style={[s.card, { backgroundColor: colors.cardAlt, borderColor: colors.border }]}>
-          {currentTimes.map((t, i) => (
+          {currentTimes.map((time, i) => (
             <TouchableOpacity
               key={i}
               style={[s.timeRow, { borderBottomColor: colors.border, borderBottomWidth: i < currentTimes.length - 1 ? 1 : 0 }]}
               onPress={() => setPickerIndex(i)}
             >
               <Text style={{ color: colors.textPrimary, fontSize: baseSizes.body * scale }}>
-                Приём {i + 1}
+                {i18n.t('schedule_intake_n', { n: i + 1 })}
               </Text>
               <Text style={{ color: colors.accent, fontWeight: '700', fontSize: baseSizes.title * scale }}>
-                {t}
+                {time}
               </Text>
             </TouchableOpacity>
           ))}
@@ -247,10 +261,10 @@ export default function ScanScheduleScreen() {
 
         {/* Частота */}
         <Text style={[s.sectionLabel, { color: colors.textSecondary, fontSize: baseSizes.caption * scale }]}>
-          ЧАСТОТА ПРИЁМА
+          {t('schedule_freq_label')}
         </Text>
         <View style={s.optionRow}>
-          {FREQUENCY_OPTIONS.map(({ value, label }) => {
+          {FREQUENCY_OPTIONS.map(({ value, labelKey }) => {
             const active = frequency === value;
             return (
               <TouchableOpacity
@@ -263,21 +277,21 @@ export default function ScanScheduleScreen() {
                 onPress={() => setFrequency(value)}
               >
                 <Text style={{ color: active ? colors.accentDark : colors.textPrimary, fontWeight: '600', fontSize: baseSizes.caption * scale, textAlign: 'center' }}>
-                  {label}
+                  {t(labelKey)}
                 </Text>
               </TouchableOpacity>
             );
           })}
         </View>
 
-        {/* Выбор дней недели */}
+        {/* Дни недели */}
         {frequency === 'custom_days' && (
           <View style={[s.card, { backgroundColor: colors.cardAlt, borderColor: colors.border }]}>
             <Text style={[s.sectionLabel, { color: colors.textSecondary, fontSize: baseSizes.caption * scale, marginBottom: 12 }]}>
-              ДНИ НЕДЕЛИ
+              {t('schedule_days_label')}
             </Text>
             <View style={s.daysRow}>
-              {WEEKDAYS.map(({ label, value }) => {
+              {WEEKDAY_KEYS.map(({ key, value }) => {
                 const active = customDays.includes(value);
                 return (
                   <TouchableOpacity
@@ -289,7 +303,7 @@ export default function ScanScheduleScreen() {
                     onPress={() => toggleDay(value)}
                   >
                     <Text style={{ color: active ? '#fff' : colors.textSecondary, fontWeight: '600', fontSize: baseSizes.caption * scale }}>
-                      {label}
+                      {t(key)}
                     </Text>
                   </TouchableOpacity>
                 );
@@ -297,7 +311,7 @@ export default function ScanScheduleScreen() {
             </View>
             {customDays.length === 0 && (
               <Text style={{ color: colors.danger, fontSize: baseSizes.caption * scale, marginTop: 8 }}>
-                Выберите хотя бы один день
+                {t('schedule_days_empty')}
               </Text>
             )}
           </View>
@@ -306,17 +320,13 @@ export default function ScanScheduleScreen() {
         {/* Превью курса */}
         <View style={[s.preview, { backgroundColor: colors.accentLight, borderColor: colors.accent }]}>
           <Text style={[s.previewLabel, { color: colors.accentDark, fontSize: baseSizes.caption * scale }]}>
-            РАСЧЁТ КУРСА
+            {t('schedule_preview_label')}
           </Text>
           <Text style={[s.previewDays, { color: colors.accentDark, fontSize: baseSizes.title * scale * 1.3 }]}>
-            {preview.durationDays} дней
+            {i18n.t('schedule_preview_days', { n: preview.durationDays })}
           </Text>
           <Text style={{ color: colors.textSecondary, fontSize: baseSizes.caption * scale, textAlign: 'center' }}>
-            {store.pillsPerPack} таблеток · {timesPerDay}× в день
-            {frequency === 'every_other_day' ? ' · через день' : ''}
-            {frequency === 'custom_days' && customDays.length > 0
-              ? ` · ${customDays.length} дн/нед`
-              : ''}
+            {i18n.t('schedule_preview_detail', { pills: store.pillsPerPack, times: timesPerDay })}{previewSuffix}
           </Text>
         </View>
 
@@ -326,7 +336,7 @@ export default function ScanScheduleScreen() {
           disabled={saving}
         >
           <Text style={[s.saveBtnText, { fontSize: baseSizes.button * scale }]}>
-            {saving ? 'Сохраняем...' : 'Сохранить курс'}
+            {saving ? t('saving') : t('schedule_save')}
           </Text>
         </TouchableOpacity>
       </ScrollView>

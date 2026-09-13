@@ -128,5 +128,23 @@
   "disclaimer_warning_body1": "PillyTrack ist keine medizinische App und gibt keine medizinischen Ratschläge. Sie dient ausschließlich zur bequemen Nachverfolgung von Arztverordnungen.",
   "disclaimer_warning_body2": "Befolgen Sie stets die Anweisungen Ihres Arztes oder Apothekers. Ändern Sie Dosierung und Zeitplan nicht ohne Rücksprache mit einem Spezialisten.",
   "disclaimer_privacy": "Alle Daten werden nur auf Ihrem Gerät gespeichert und nicht an Dritte weitergegeben.",
-  "disclaimer_btn": "Verstanden, loslegen"
+  "disclaimer_btn": "Verstanden, loslegen",
+
+  "schedule_freq_label": "HÄUFIGKEIT",
+  "schedule_freq_daily": "Jeden Tag",
+  "schedule_freq_other": "Jeden zweiten Tag",
+  "schedule_freq_custom": "Benutzerdefiniert",
+  "schedule_days_label": "WOCHENTAGE",
+  "schedule_days_empty": "Wähle mindestens einen Tag",
+  "schedule_days_alert_title": "Tage auswählen",
+  "schedule_days_alert_body": "Bitte wähle mindestens einen Wochentag",
+  "schedule_preview_other_day": "jeden 2. Tag",
+  "schedule_preview_custom_days": "{{n}} T/Wo",
+  "wd_mon": "Mo",
+  "wd_tue": "Di",
+  "wd_wed": "Mi",
+  "wd_thu": "Do",
+  "wd_fri": "Fr",
+  "wd_sat": "Sa",
+  "wd_sun": "So"
 }

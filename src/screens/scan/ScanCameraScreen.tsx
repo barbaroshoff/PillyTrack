@@ -66,10 +66,10 @@ export default function ScanCameraScreen() {
 
   useEffect(() => {
     if (permission?.granted && !processing) {
-      const t = setTimeout(startAutoCapture, 800);
-      timerRef.current = t;
+      const timer = setTimeout(startAutoCapture, 800);
+      timerRef.current = timer;
       return () => {
-        clearTimeout(t);
+        clearTimeout(timer);
         cancelAutoCapture();
       };
     }

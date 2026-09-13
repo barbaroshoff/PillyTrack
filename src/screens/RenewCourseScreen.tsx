@@ -19,7 +19,7 @@ import { getMedicationById } from '../db/medications';
 import { getCourseByMedicationId, insertCourse, updateCourseStatus } from '../db/courses';
 import { insertIntakeEvents, deletePendingIntakesByCourse } from '../db/intakes';
 import { calculateCourse } from '../services/scheduleEngine';
-import { scheduleIntakeNotifications } from '../services/notifications';
+import { scheduleIntakeNotifications, cancelNotificationsForMedication } from '../services/notifications';
 import { useScanFlowStore } from '../store/scanFlowStore';
 import { useIntakesStore } from '../store/intakesStore';
 import { generateId } from '../utils/id';
@@ -71,6 +71,7 @@ export default function RenewCourseScreen() {
     setSaving(true);
     try {
       const pillsPerPack = parseInt(data.pillsPerPack, 10) || 30;
+      await cancelNotificationsForMedication(medication.id);
       await updateCourseStatus(course.id, 'completed');
       await deletePendingIntakesByCourse(course.id);
 

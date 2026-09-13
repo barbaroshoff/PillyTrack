@@ -128,5 +128,23 @@
   "disclaimer_warning_body1": "PillyTrack не является медицинским приложением и не даёт медицинских рекомендаций. Приложение предназначено только для удобного отслеживания назначений врача.",
   "disclaimer_warning_body2": "Всегда следуйте инструкциям врача или фармацевта. Не изменяйте дозировку и расписание без консультации со специалистом.",
   "disclaimer_privacy": "Все данные хранятся только на вашем устройстве и не передаются третьим лицам.",
-  "disclaimer_btn": "Понятно, начать"
+  "disclaimer_btn": "Понятно, начать",
+
+  "schedule_freq_label": "ЧАСТОТА ПРИЁМА",
+  "schedule_freq_daily": "Каждый день",
+  "schedule_freq_other": "Через день",
+  "schedule_freq_custom": "Выбрать дни",
+  "schedule_days_label": "ДНИ НЕДЕЛИ",
+  "schedule_days_empty": "Выберите хотя бы один день",
+  "schedule_days_alert_title": "Выберите дни",
+  "schedule_days_alert_body": "Выберите хотя бы один день недели",
+  "schedule_preview_other_day": "через день",
+  "schedule_preview_custom_days": "{{n}} дн/нед",
+  "wd_mon": "Пн",
+  "wd_tue": "Вт",
+  "wd_wed": "Ср",
+  "wd_thu": "Чт",
+  "wd_fri": "Пт",
+  "wd_sat": "Сб",
+  "wd_sun": "Вс"
 }

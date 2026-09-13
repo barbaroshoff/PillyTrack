@@ -128,5 +128,23 @@
   "disclaimer_warning_body1": "PillyTrack не є медичним застосунком і не надає медичних рекомендацій. Призначений лише для зручного відстеження призначень лікаря.",
   "disclaimer_warning_body2": "Завжди дотримуйтесь вказівок лікаря або фармацевта. Не змінюйте дозування і розклад без консультації зі спеціалістом.",
   "disclaimer_privacy": "Всі дані зберігаються лише на вашому пристрої і не передаються третім особам.",
-  "disclaimer_btn": "Зрозуміло, почати"
+  "disclaimer_btn": "Зрозуміло, почати",
+
+  "schedule_freq_label": "ЧАСТОТА",
+  "schedule_freq_daily": "Щодня",
+  "schedule_freq_other": "Через день",
+  "schedule_freq_custom": "Вибрати дні",
+  "schedule_days_label": "ДНІ ТИЖНЯ",
+  "schedule_days_empty": "Оберіть хоча б один день",
+  "schedule_days_alert_title": "Оберіть дні",
+  "schedule_days_alert_body": "Оберіть хоча б один день тижня",
+  "schedule_preview_other_day": "через день",
+  "schedule_preview_custom_days": "{{n}} дн/тиж",
+  "wd_mon": "Пн",
+  "wd_tue": "Вт",
+  "wd_wed": "Ср",
+  "wd_thu": "Чт",
+  "wd_fri": "Пт",
+  "wd_sat": "Сб",
+  "wd_sun": "Нд"
 }

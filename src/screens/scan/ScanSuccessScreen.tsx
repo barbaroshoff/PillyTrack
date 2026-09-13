@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import { useFontScale } from '../../context/FontScaleContext';
 import { baseSizes } from '../../theme/typography';
@@ -14,6 +15,7 @@ type Nav = NativeStackNavigationProp<RootStackParamList>;
 export default function ScanSuccessScreen() {
   const { colors } = useTheme();
   const { scale } = useFontScale();
+  const { t } = useTranslation();
   const navigation = useNavigation<Nav>();
   const medicationName = useScanFlowStore((s) => s.medicationName);
   const reset = useScanFlowStore((s) => s.reset);
@@ -28,10 +30,10 @@ export default function ScanSuccessScreen() {
         </View>
 
         <Text style={[s.title, { color: colors.textPrimary, fontSize: baseSizes.title * scale * 1.15 }]}>
-          Готово!
+          {t('success_title')}
         </Text>
         <Text style={[s.sub, { color: colors.textSecondary, fontSize: baseSizes.body * scale }]}>
-          Будем напоминать вовремя
+          {t('success_body')}
         </Text>
         {medicationName ? (
           <View style={[s.pill, { backgroundColor: colors.accentLight }]}>
@@ -45,7 +47,7 @@ export default function ScanSuccessScreen() {
           style={[s.btn, { backgroundColor: colors.accent }]}
           onPress={() => navigation.navigate('Tabs')}
         >
-          <Text style={[s.btnText, { fontSize: baseSizes.button * scale }]}>На главную</Text>
+          <Text style={[s.btnText, { fontSize: baseSizes.button * scale }]}>{t('success_home')}</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>

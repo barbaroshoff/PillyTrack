@@ -25,6 +25,13 @@ const DEFAULT_TIMES: Record<number, string[]> = {
   4: ['08:00', '12:00', '16:00', '20:00'],
 };
 
+function toLocalDateStr(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
 function makeEvent(courseId: string, dateStr: string, time: string): Omit<IntakeEvent, 'id'> {
   return {
     course_id: courseId,
@@ -52,7 +59,7 @@ export function calculateCourse(input: ScheduleInput): ScheduleResult {
     for (let i = 0; i < doseDaysNeeded; i++) {
       const date = new Date(startDate);
       date.setDate(date.getDate() + i * 2);
-      const dateStr = date.toISOString().split('T')[0];
+      const dateStr = toLocalDateStr(date);
       for (const time of times) events.push(makeEvent(courseId, dateStr, time));
     }
     const durationDays = doseDaysNeeded > 0 ? (doseDaysNeeded - 1) * 2 + 1 : 0;
@@ -66,7 +73,7 @@ export function calculateCourse(input: ScheduleInput): ScheduleResult {
       const date = new Date(startDate);
       date.setDate(date.getDate() + calDay);
       if (customDays.includes(date.getDay())) {
-        const dateStr = date.toISOString().split('T')[0];
+        const dateStr = toLocalDateStr(date);
         for (const time of times) events.push(makeEvent(courseId, dateStr, time));
         filled++;
       }
@@ -79,7 +86,7 @@ export function calculateCourse(input: ScheduleInput): ScheduleResult {
   for (let day = 0; day < doseDaysNeeded; day++) {
     const date = new Date(startDate);
     date.setDate(date.getDate() + day);
-    const dateStr = date.toISOString().split('T')[0];
+    const dateStr = toLocalDateStr(date);
     for (const time of times) events.push(makeEvent(courseId, dateStr, time));
   }
   return { durationDays: doseDaysNeeded, intakeEvents: events };

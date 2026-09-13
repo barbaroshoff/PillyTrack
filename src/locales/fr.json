@@ -128,5 +128,23 @@
   "disclaimer_warning_body1": "PillyTrack n'est pas une application médicale et ne donne pas de conseils médicaux. Elle est destinée uniquement à suivre les prescriptions de votre médecin.",
   "disclaimer_warning_body2": "Suivez toujours les instructions de votre médecin ou pharmacien. Ne modifiez pas la posologie ni le calendrier sans consulter un spécialiste.",
   "disclaimer_privacy": "Toutes les données sont stockées uniquement sur votre appareil et ne sont pas partagées.",
-  "disclaimer_btn": "Compris, commencer"
+  "disclaimer_btn": "Compris, commencer",
+
+  "schedule_freq_label": "FRÉQUENCE",
+  "schedule_freq_daily": "Chaque jour",
+  "schedule_freq_other": "Un jour sur deux",
+  "schedule_freq_custom": "Jours personnalisés",
+  "schedule_days_label": "JOURS DE LA SEMAINE",
+  "schedule_days_empty": "Sélectionnez au moins un jour",
+  "schedule_days_alert_title": "Choisir des jours",
+  "schedule_days_alert_body": "Veuillez sélectionner au moins un jour de la semaine",
+  "schedule_preview_other_day": "un jour sur deux",
+  "schedule_preview_custom_days": "{{n}} j/sem",
+  "wd_mon": "Lu",
+  "wd_tue": "Ma",
+  "wd_wed": "Me",
+  "wd_thu": "Je",
+  "wd_fri": "Ve",
+  "wd_sat": "Sa",
+  "wd_sun": "Di"
 }

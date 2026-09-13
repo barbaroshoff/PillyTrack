@@ -13,6 +13,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import * as ImagePicker from 'expo-image-picker';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import { useFontScale } from '../../context/FontScaleContext';
 import { baseSizes } from '../../theme/typography';
@@ -29,6 +30,7 @@ interface FormValues {
 export default function ScanConfirmScreen() {
   const { colors } = useTheme();
   const { scale } = useFontScale();
+  const { t } = useTranslation();
   const navigation = useNavigation<Nav>();
   const setField = useScanFlowStore((s) => s.setField);
   const photoUri = useScanFlowStore((s) => s.photoUri);
@@ -67,10 +69,10 @@ export default function ScanConfirmScreen() {
     <SafeAreaView style={[s.root, { backgroundColor: colors.bg }]}>
       <View style={s.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={{ color: colors.accent, fontSize: baseSizes.body * scale }}>Назад</Text>
+          <Text style={{ color: colors.accent, fontSize: baseSizes.body * scale }}>{t('back')}</Text>
         </TouchableOpacity>
         <Text style={[s.title, { color: colors.textPrimary, fontSize: baseSizes.title * scale }]}>
-          Подтвердить
+          {t('confirm_title')}
         </Text>
         <View style={{ width: 60 }} />
       </View>
@@ -87,7 +89,7 @@ export default function ScanConfirmScreen() {
             <>
               <Text style={{ fontSize: 36 }}>📦</Text>
               <Text style={{ color: colors.textMuted, fontSize: baseSizes.caption * scale, marginTop: 8 }}>
-                Добавить фото упаковки
+                {t('confirm_photo')}
               </Text>
             </>
           )}
@@ -95,7 +97,7 @@ export default function ScanConfirmScreen() {
 
         {/* Название */}
         <Text style={[s.label, { color: colors.textSecondary, fontSize: baseSizes.caption * scale }]}>
-          НАЗВАНИЕ ПРЕПАРАТА
+          {t('confirm_name_label')}
         </Text>
         <Controller
           control={control}
@@ -112,7 +114,7 @@ export default function ScanConfirmScreen() {
                   fontSize: baseSizes.body * scale,
                 },
               ]}
-              placeholder="Например, Омепразол"
+              placeholder={t('confirm_name_placeholder')}
               placeholderTextColor={colors.textMuted}
               value={value}
               onChangeText={onChange}
@@ -123,7 +125,7 @@ export default function ScanConfirmScreen() {
 
         {/* Количество таблеток */}
         <Text style={[s.label, { color: colors.textSecondary, fontSize: baseSizes.caption * scale }]}>
-          ТАБЛЕТОК В УПАКОВКЕ
+          {t('confirm_pills_label')}
         </Text>
         <View style={s.stepper}>
           <TouchableOpacity
@@ -159,7 +161,7 @@ export default function ScanConfirmScreen() {
           style={[s.nextBtn, { backgroundColor: colors.accent }]}
           onPress={handleSubmit(onSubmit)}
         >
-          <Text style={[s.nextText, { fontSize: baseSizes.button * scale }]}>Далее</Text>
+          <Text style={[s.nextText, { fontSize: baseSizes.button * scale }]}>{t('next')}</Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
