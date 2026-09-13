@@ -18,6 +18,7 @@ import { baseSizes } from '../../theme/typography';
 import { useScanFlowStore } from '../../store/scanFlowStore';
 import { calculateCourse } from '../../services/scheduleEngine';
 import { insertMedication } from '../../db/medications';
+import { scheduleIntakeNotifications } from '../../services/notifications';
 import { insertCourse } from '../../db/courses';
 import { insertIntakeEvents } from '../../db/intakes';
 import { useIntakesStore } from '../../store/intakesStore';
@@ -129,9 +130,9 @@ export default function ScanScheduleScreen() {
         status: 'active',
       });
 
-      await insertIntakeEvents(
-        intakeEvents.map((e) => ({ ...e, id: generateId() })),
-      );
+      const eventsWithIds = intakeEvents.map((e) => ({ ...e, id: generateId() }));
+      await insertIntakeEvents(eventsWithIds);
+      await scheduleIntakeNotifications(store.medicationName, eventsWithIds);
 
       await loadToday();
       navigation.navigate('ScanSuccess');

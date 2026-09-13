@@ -42,6 +42,27 @@ export async function getCourseByMedicationId(medicationId: string): Promise<Cou
   return { ...row, custom_times: JSON.parse(row.custom_times) };
 }
 
+export interface CourseWithMedication extends Course {
+  medication_name: string;
+  photo_uri: string | null;
+  next_intake_at: string | null;
+}
+
+export async function getActiveCoursesWithMedications(): Promise<CourseWithMedication[]> {
+  const db = await getDb();
+  const rows = await db.getAllAsync<Omit<CourseWithMedication, 'custom_times'> & { custom_times: string }>(
+    `SELECT c.*, m.name as medication_name, m.photo_uri,
+       (SELECT scheduled_at FROM intake_events
+        WHERE course_id = c.id AND status = 'pending'
+        ORDER BY scheduled_at ASC LIMIT 1) as next_intake_at
+     FROM courses c
+     JOIN medications m ON c.medication_id = m.id
+     WHERE c.status = 'active'
+     ORDER BY CASE WHEN next_intake_at IS NULL THEN 1 ELSE 0 END, next_intake_at ASC`,
+  );
+  return rows.map((r) => ({ ...r, custom_times: JSON.parse(r.custom_times) }));
+}
+
 export async function getCourseById(id: string): Promise<Course | null> {
   const db = await getDb();
   const row = await db.getFirstAsync<Omit<Course, 'custom_times'> & { custom_times: string }>(

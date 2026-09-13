@@ -18,6 +18,7 @@ import { getMedicationById } from '../db/medications';
 import { getCourseByMedicationId, insertCourse } from '../db/courses';
 import { insertIntakeEvents } from '../db/intakes';
 import { calculateCourse } from '../services/scheduleEngine';
+import { scheduleIntakeNotifications } from '../services/notifications';
 import { useIntakesStore } from '../store/intakesStore';
 import { generateId } from '../utils/id';
 import type { Medication } from '../db/medications';
@@ -87,7 +88,9 @@ export default function RenewCourseScreen() {
         status: 'active',
       });
 
-      await insertIntakeEvents(intakeEvents.map((e) => ({ ...e, id: generateId() })));
+      const eventsWithIds = intakeEvents.map((e) => ({ ...e, id: generateId() }));
+      await insertIntakeEvents(eventsWithIds);
+      await scheduleIntakeNotifications(medication.name, eventsWithIds);
       await loadToday();
 
       navigation.navigate('ScanSuccess');

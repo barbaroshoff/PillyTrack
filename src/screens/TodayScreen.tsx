@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 import { useFontScale } from '../context/FontScaleContext';
 import { baseSizes } from '../theme/typography';
@@ -16,6 +17,7 @@ export default function TodayScreen() {
   const { colors } = useTheme();
   const { scale } = useFontScale();
   const navigation = useNavigation<Nav>();
+  const { t } = useTranslation();
   const intakes = useTodayIntakes();
   const markIntake = useMarkIntake();
 
@@ -25,11 +27,11 @@ export default function TodayScreen() {
   return (
     <SafeAreaView style={[s.root, { backgroundColor: colors.bg }]} edges={['top']}>
       <Text style={[s.heading, { color: colors.textPrimary, fontSize: baseSizes.title * scale }]}>
-        Сегодня
+        {t('today')}
       </Text>
 
-      {empty && <EmptyState colors={colors} scale={scale} />}
-      {allDone && !empty && <AllDoneState colors={colors} scale={scale} />}
+      {empty && <EmptyState colors={colors} scale={scale} t={t} />}
+      {allDone && !empty && <AllDoneState colors={colors} scale={scale} t={t} />}
       {!empty && !allDone && (
         <FlatList
           data={intakes}
@@ -56,33 +58,33 @@ export default function TodayScreen() {
   );
 }
 
-function EmptyState({ colors, scale }: { colors: any; scale: number }) {
+function EmptyState({ colors, scale, t }: { colors: any; scale: number; t: any }) {
   return (
     <View style={s.center}>
       <View style={[s.iconCircle, { backgroundColor: colors.accentLight }]}>
         <Text style={{ fontSize: 32 }}>💊</Text>
       </View>
       <Text style={[s.stateTitle, { color: colors.textPrimary, fontSize: baseSizes.title * scale }]}>
-        Сегодня отдыхаем
+        {t('today_empty_title')}
       </Text>
       <Text style={[s.stateBody, { color: colors.textSecondary, fontSize: baseSizes.body * scale }]}>
-        Лекарств не запланировано
+        {t('today_empty_body')}
       </Text>
     </View>
   );
 }
 
-function AllDoneState({ colors, scale }: { colors: any; scale: number }) {
+function AllDoneState({ colors, scale, t }: { colors: any; scale: number; t: any }) {
   return (
     <View style={s.center}>
       <View style={[s.iconCircle, { backgroundColor: colors.successLight }]}>
         <Text style={{ fontSize: 32 }}>✓</Text>
       </View>
       <Text style={[s.stateTitle, { color: colors.textPrimary, fontSize: baseSizes.title * scale }]}>
-        Отлично!
+        {t('today_done_title')}
       </Text>
       <Text style={[s.stateBody, { color: colors.textSecondary, fontSize: baseSizes.body * scale }]}>
-        На сегодня всё принято
+        {t('today_done_body')}
       </Text>
     </View>
   );
@@ -92,16 +94,15 @@ const s = StyleSheet.create({
   root: { flex: 1 },
   heading: { fontWeight: '700', margin: 20 },
   list: { paddingHorizontal: 16, paddingBottom: 100 },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32 },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32, gap: 12 },
   iconCircle: {
     width: 80,
     height: 80,
     borderRadius: 40,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 16,
   },
-  stateTitle: { fontWeight: '700', marginBottom: 8, textAlign: 'center' },
+  stateTitle: { fontWeight: '700', textAlign: 'center' },
   stateBody: { textAlign: 'center', lineHeight: 22 },
   fab: {
     position: 'absolute',

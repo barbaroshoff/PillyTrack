@@ -58,6 +58,21 @@ export async function getIntakeStatsByCourse(courseId: string): Promise<IntakeSt
   };
 }
 
+export async function getIntakesForMonth(yearMonth: string): Promise<IntakeEvent[]> {
+  const db = await getDb();
+  return db.getAllAsync<IntakeEvent>(
+    `SELECT * FROM intake_events WHERE scheduled_at LIKE ? ORDER BY scheduled_at`,
+    [`${yearMonth}%`],
+  );
+}
+
+export async function getPendingIntakes(): Promise<IntakeEvent[]> {
+  const db = await getDb();
+  return db.getAllAsync<IntakeEvent>(
+    `SELECT * FROM intake_events WHERE status = 'pending' ORDER BY scheduled_at`,
+  );
+}
+
 export async function getRecentIntakesByCourse(courseId: string, limit = 5): Promise<IntakeEvent[]> {
   const db = await getDb();
   return db.getAllAsync<IntakeEvent>(
