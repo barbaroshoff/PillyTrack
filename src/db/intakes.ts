@@ -8,6 +8,7 @@ export interface IntakeEvent {
   scheduled_at: string;
   status: IntakeStatus;
   marked_at: string | null;
+  medication_name?: string;
 }
 
 export async function insertIntakeEvents(events: IntakeEvent[]): Promise<void> {
@@ -25,7 +26,12 @@ export async function insertIntakeEvents(events: IntakeEvent[]): Promise<void> {
 export async function getIntakesForDate(dateIso: string): Promise<IntakeEvent[]> {
   const db = await getDb();
   return db.getAllAsync<IntakeEvent>(
-    `SELECT * FROM intake_events WHERE scheduled_at LIKE ? ORDER BY scheduled_at`,
+    `SELECT ie.*, m.name as medication_name
+     FROM intake_events ie
+     JOIN courses c ON ie.course_id = c.id
+     JOIN medications m ON c.medication_id = m.id
+     WHERE ie.scheduled_at LIKE ?
+     ORDER BY ie.scheduled_at`,
     [`${dateIso}%`],
   );
 }

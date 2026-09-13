@@ -50,7 +50,7 @@ export default function IntakeCard({ intake, onTaken, onSkipped }: Props) {
 
         <View style={s.info}>
           <Text style={[s.name, { color: colors.textPrimary, fontSize: baseSizes.body * scale }]}>
-            {intake.course_id}
+            {intake.medication_name ?? intake.course_id}
           </Text>
           <Text style={{ color: colors.textSecondary, fontSize: baseSizes.caption * scale }}>
             {time}

@@ -1,22 +1,16 @@
 import React from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 import { useFontScale } from '../context/FontScaleContext';
 import { baseSizes } from '../theme/typography';
 import { useTodayIntakes, useMarkIntake } from '../store/intakesStore';
 import IntakeCard from '../components/ui/IntakeCard';
-import type { RootStackParamList } from '../navigation/RootNavigator';
-
-type Nav = NativeStackNavigationProp<RootStackParamList>;
 
 export default function TodayScreen() {
   const { colors } = useTheme();
   const { scale } = useFontScale();
-  const navigation = useNavigation<Nav>();
   const { t } = useTranslation();
   const intakes = useTodayIntakes();
   const markIntake = useMarkIntake();
@@ -47,13 +41,6 @@ export default function TodayScreen() {
         />
       )}
 
-      <TouchableOpacity
-        style={[s.fab, { backgroundColor: colors.accent }]}
-        onPress={() => navigation.navigate('ScanCamera')}
-        activeOpacity={0.85}
-      >
-        <Text style={s.fabIcon}>+</Text>
-      </TouchableOpacity>
     </SafeAreaView>
   );
 }
@@ -104,20 +91,4 @@ const s = StyleSheet.create({
   },
   stateTitle: { fontWeight: '700', textAlign: 'center' },
   stateBody: { textAlign: 'center', lineHeight: 22 },
-  fab: {
-    position: 'absolute',
-    bottom: 24,
-    right: 24,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
-    elevation: 6,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-  },
-  fabIcon: { color: '#fff', fontSize: 28, lineHeight: 32 },
 });
