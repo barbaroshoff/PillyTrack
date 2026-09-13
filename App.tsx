@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { AppState } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import { ThemeProvider } from './src/context/ThemeContext';
@@ -11,6 +11,7 @@ import {
   markOverdueIntakes,
 } from './src/services/notifications';
 import { getPendingIntakes } from './src/db/intakes';
+import DisclaimerModal, { useDisclaimerState } from './src/components/DisclaimerModal';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -25,13 +26,14 @@ Notifications.setNotificationHandler({
 function AppInit() {
   const loadToday = useIntakesStore((s) => s.loadToday);
   const appState = useRef(AppState.currentState);
+  const { accepted, accept } = useDisclaimerState();
 
   useEffect(() => {
     initI18n();
     setupNotificationCategories();
     loadToday();
 
-    const sub = Notifications.addNotificationResponseReceivedListener(
+    const notifSub = Notifications.addNotificationResponseReceivedListener(
       handleNotificationResponse,
     );
 
@@ -45,12 +47,19 @@ function AppInit() {
     });
 
     return () => {
-      sub.remove();
+      notifSub.remove();
       appStateSub.remove();
     };
   }, [loadToday]);
 
-  return <RootNavigator />;
+  return (
+    <>
+      <RootNavigator />
+      {accepted === false && (
+        <DisclaimerModal visible onAccept={accept} />
+      )}
+    </>
+  );
 }
 
 export default function App() {

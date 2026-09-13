@@ -1,0 +1,131 @@
+import React, { useEffect, useState } from 'react';
+import {
+  Modal,
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTheme } from '../context/ThemeContext';
+import { useFontScale } from '../context/FontScaleContext';
+import { baseSizes } from '../theme/typography';
+
+const DISCLAIMER_KEY = '@pilly_disclaimer_accepted';
+
+export function useDisclaimerState() {
+  const [accepted, setAccepted] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    AsyncStorage.getItem(DISCLAIMER_KEY).then((v) => setAccepted(v === 'true'));
+  }, []);
+
+  const accept = async () => {
+    await AsyncStorage.setItem(DISCLAIMER_KEY, 'true');
+    setAccepted(true);
+  };
+
+  return { accepted, accept };
+}
+
+interface Props {
+  visible: boolean;
+  onAccept: () => void;
+}
+
+export default function DisclaimerModal({ visible, onAccept }: Props) {
+  const { colors } = useTheme();
+  const { scale } = useFontScale();
+
+  return (
+    <Modal visible={visible} animationType="fade" transparent={false} statusBarTranslucent>
+      <SafeAreaView style={[s.root, { backgroundColor: colors.bg }]}>
+        <View style={s.inner}>
+          <View style={[s.iconCircle, { backgroundColor: colors.accentLight }]}>
+            <Text style={{ fontSize: 40 }}>💊</Text>
+          </View>
+
+          <Text style={[s.title, { color: colors.textPrimary, fontSize: baseSizes.title * scale * 1.1 }]}>
+            Добро пожаловать в PillyTrack
+          </Text>
+
+          <ScrollView style={s.textBox} contentContainerStyle={s.textBoxInner} showsVerticalScrollIndicator={false}>
+            <Text style={[s.disclaimerText, { color: colors.textSecondary, fontSize: baseSizes.body * scale }]}>
+              PillyTrack помогает отслеживать расписание приёма лекарств и напоминает вовремя.
+            </Text>
+
+            <View style={[s.warningBox, { backgroundColor: colors.warningLight, borderColor: colors.warning }]}>
+              <Text style={[s.warningTitle, { color: colors.warning, fontSize: baseSizes.body * scale }]}>
+                ⚠️ Важно
+              </Text>
+              <Text style={[s.warningText, { color: colors.textPrimary, fontSize: baseSizes.body * scale }]}>
+                PillyTrack{' '}
+                <Text style={{ fontWeight: '700' }}>не является медицинским приложением</Text>
+                {' '}и не даёт медицинских рекомендаций. Приложение предназначено только для удобного
+                отслеживания назначений врача.
+              </Text>
+              <Text style={[s.warningText, { color: colors.textPrimary, fontSize: baseSizes.body * scale, marginTop: 8 }]}>
+                Всегда следуйте инструкциям врача или фармацевта. Не изменяйте дозировку и расписание
+                без консультации со специалистом.
+              </Text>
+            </View>
+
+            <Text style={[s.disclaimerText, { color: colors.textSecondary, fontSize: baseSizes.body * scale }]}>
+              Все данные хранятся только на вашем устройстве и не передаются третьим лицам.
+            </Text>
+          </ScrollView>
+
+          <TouchableOpacity
+            style={[s.acceptBtn, { backgroundColor: colors.accent }]}
+            onPress={onAccept}
+          >
+            <Text style={[s.acceptText, { fontSize: baseSizes.button * scale }]}>
+              Понятно, начать
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    </Modal>
+  );
+}
+
+const s = StyleSheet.create({
+  root: { flex: 1 },
+  inner: {
+    flex: 1,
+    padding: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 16,
+  },
+  iconCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 4,
+  },
+  title: { fontWeight: '800', textAlign: 'center', lineHeight: 28 },
+  textBox: { width: '100%', flexGrow: 0, maxHeight: 320 },
+  textBoxInner: { gap: 12 },
+  disclaimerText: { lineHeight: 22, textAlign: 'center' },
+  warningBox: {
+    borderRadius: 14,
+    borderWidth: 1.5,
+    padding: 16,
+    gap: 6,
+  },
+  warningTitle: { fontWeight: '700', marginBottom: 4 },
+  warningText: { lineHeight: 22 },
+  acceptBtn: {
+    width: '100%',
+    padding: 16,
+    borderRadius: 14,
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  acceptText: { color: '#fff', fontWeight: '700' },
+});

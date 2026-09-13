@@ -1,22 +1,44 @@
 {
   "expo": {
     "name": "PillyTrack",
-    "slug": "PillyTrack",
+    "slug": "pillytrack",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#FFFFFF"
+    },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": false,
+      "bundleIdentifier": "com.pillytrack.app",
+      "buildNumber": "1",
+      "infoPlist": {
+        "NSCameraUsageDescription": "PillyTrack использует камеру для сканирования штрихкода упаковки лекарства. Камера нужна только для добавления нового курса — фото и видео не сохраняются.",
+        "NSPhotoLibraryUsageDescription": "PillyTrack может добавить фото упаковки лекарства для удобной идентификации. Доступ к фото нужен только для этого.",
+        "NSUserNotificationUsageDescription": "PillyTrack отправляет напоминания о приёме лекарств в запланированное время. Без уведомлений приложение не сможет напоминать вовремя."
+      }
     },
     "android": {
+      "package": "com.pillytrack.app",
+      "versionCode": 1,
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
+        "monochromeImage": "./assets/android-icon-monochrome.png",
+        "backgroundColor": "#E6F4FE"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "CAMERA",
+        "READ_MEDIA_IMAGES",
+        "RECEIVE_BOOT_COMPLETED",
+        "SCHEDULE_EXACT_ALARM",
+        "POST_NOTIFICATIONS",
+        "VIBRATE"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -24,7 +46,33 @@
     "plugins": [
       "expo-sqlite",
       "@react-native-community/datetimepicker",
-      "expo-localization"
-    ]
+      "expo-localization",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "PillyTrack использует камеру для сканирования штрихкода упаковки лекарства."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "PillyTrack добавляет фото упаковки для удобной идентификации лекарства."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#4FA8E8",
+          "sounds": [],
+          "iosDisplayInForeground": true
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "REPLACE_WITH_YOUR_EAS_PROJECT_ID"
+      }
+    }
   }
 }

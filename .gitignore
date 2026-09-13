@@ -39,3 +39,9 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# EAS / Store credentials (never commit)
+google-play-service-account.json
+*.mobileprovision
+*.p12
+credentials.json
