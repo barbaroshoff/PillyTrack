@@ -106,7 +106,7 @@ export default function RenewCourseScreen() {
       await scheduleIntakeNotifications(medication.name, eventsWithIds);
       await loadToday();
       setScanField('medicationName', medication.name);
-      navigation.navigate('ScanSuccess');
+      navigation.navigate('ScanFlow', { screen: 'ScanSuccess' });
     } catch {
       Alert.alert(t('error'), t('renew_error'));
       setSaving(false);

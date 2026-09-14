@@ -51,7 +51,7 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
       rootNav.navigate('Paywall');
       return;
     }
-    rootNav.navigate('ScanCamera');
+    rootNav.navigate('ScanFlow', { screen: 'ScanCamera' });
   };
 
   return (

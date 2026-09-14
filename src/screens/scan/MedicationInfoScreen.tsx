@@ -17,10 +17,10 @@ import { useTheme } from '../../context/ThemeContext';
 import { useFontScale } from '../../context/FontScaleContext';
 import { baseSizes } from '../../theme/typography';
 import { useScanFlowStore } from '../../store/scanFlowStore';
-import type { RootStackParamList } from '../../navigation/RootNavigator';
+import type { ScanFlowParamList } from '../../navigation/ScanFlowNavigator';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'MedicationInfo'>;
-type Nav = NativeStackNavigationProp<RootStackParamList>;
+type Props = NativeStackScreenProps<ScanFlowParamList, 'MedicationInfo'>;
+type Nav = NativeStackNavigationProp<ScanFlowParamList>;
 
 export default function MedicationInfoScreen() {
   const { colors } = useTheme();

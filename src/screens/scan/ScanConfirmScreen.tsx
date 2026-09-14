@@ -18,9 +18,9 @@ import { useTheme } from '../../context/ThemeContext';
 import { useFontScale } from '../../context/FontScaleContext';
 import { baseSizes } from '../../theme/typography';
 import { useScanFlowStore } from '../../store/scanFlowStore';
-import type { RootStackParamList } from '../../navigation/RootNavigator';
+import type { ScanFlowParamList } from '../../navigation/ScanFlowNavigator';
 
-type Nav = NativeStackNavigationProp<RootStackParamList>;
+type Nav = NativeStackNavigationProp<ScanFlowParamList>;
 
 interface FormValues {
   medicationName: string;

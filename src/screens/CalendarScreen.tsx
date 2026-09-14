@@ -1,16 +1,13 @@
-import React, { useCallback, useState, useMemo, useRef, useEffect } from 'react';
+import React, { useCallback, useState, useMemo, useEffect } from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  Modal,
-  TouchableOpacity,
-  Animated,
   FlatList,
-  LayoutChangeEvent,
+  Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Calendar } from 'react-native-calendars';
+import { CalendarList } from 'react-native-calendars';
 import type { DateData } from 'react-native-calendars';
 import { useIsFocused } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
@@ -23,10 +20,14 @@ import type { IntakeEvent } from '../db/intakes';
 type MarkedDates = Record<string, any>;
 
 // Внутренние константы react-native-calendars
-const CAL_HEADER_H = 46;  // строка месяц + стрелки
+const CAL_HEADER_H = 46;  // строка с названием месяца (без стрелок)
 const CAL_NAMES_H  = 30;  // строка Пн Вт Ср…
 const ROWS         = 6;   // максимум строк в месяце
 const ROW_MARGIN   = 8;   // margin-top + bottom одной строки
+
+const { width: SCREEN_W } = Dimensions.get('window');
+const CELL_SIZE = Math.floor(SCREEN_W / 7) - 6;
+const MONTH_HEIGHT = CAL_HEADER_H + CAL_NAMES_H + ROWS * (CELL_SIZE + ROW_MARGIN) + 16;
 
 function buildMarkedDates(
   events: IntakeEvent[],
@@ -109,10 +110,6 @@ export default function CalendarScreen() {
   const [currentMonth, setCurrentMonth] = useState(todayStr.slice(0, 7));
   const [selectedDate, setSelectedDate] = useState(todayStr);
   const [events, setEvents] = useState<IntakeEvent[]>([]);
-  const [sheetVisible, setSheetVisible] = useState(false);
-  const [cellSize, setCellSize] = useState(40);
-  const slideY = useRef(new Animated.Value(400)).current;
-  const closingRef = useRef(false);
   const isFocused = useIsFocused();
 
   const load = useCallback(async (month: string) => {
@@ -134,24 +131,8 @@ export default function CalendarScreen() {
     [events, selectedDate],
   );
 
-  const openSheet = () => {
-    closingRef.current = false;
-    slideY.stopAnimation();
-    slideY.setValue(400);
-    setSheetVisible(true);
-    Animated.timing(slideY, { toValue: 0, duration: 260, useNativeDriver: true }).start();
-  };
-
-  const closeSheet = () => {
-    closingRef.current = true;
-    Animated.timing(slideY, { toValue: 400, duration: 200, useNativeDriver: true }).start(({ finished }) => {
-      if (finished && closingRef.current) setSheetVisible(false);
-    });
-  };
-
   const onDayPress = (day: DateData) => {
     setSelectedDate(day.dateString);
-    openSheet();
   };
 
   const onMonthChange = (month: DateData) => {
@@ -159,18 +140,15 @@ export default function CalendarScreen() {
     setCurrentMonth(ym);
   };
 
-  const onCalendarContainerLayout = (e: LayoutChangeEvent) => {
-    const h = e.nativeEvent.layout.height;
-    const gridH = h - CAL_HEADER_H - CAL_NAMES_H;
-    const size = Math.max(32, Math.floor(gridH / ROWS) - ROW_MARGIN);
-    setCellSize(size);
-  };
-
   return (
     <SafeAreaView style={[s.root, { backgroundColor: colors.bg }]} edges={['top']}>
-      {/* Контейнер календаря занимает всё свободное место */}
-      <View style={s.calendarContainer} onLayout={onCalendarContainerLayout}>
-        <Calendar
+      {/* Календарь — непрерывный вертикальный скролл, следующий месяц открывается прокруткой вниз */}
+      <View style={s.calendarContainer}>
+        <CalendarList
+          pastScrollRange={12}
+          futureScrollRange={12}
+          calendarHeight={MONTH_HEIGHT}
+          showScrollIndicator={false}
           markingType="custom"
           markedDates={markedDates}
           onDayPress={onDayPress}
@@ -183,7 +161,6 @@ export default function CalendarScreen() {
             dayTextColor: colors.textPrimary,
             textDisabledColor: colors.textMuted,
             monthTextColor: colors.textPrimary,
-            arrowColor: colors.accent,
             textMonthFontWeight: '700',
             textMonthFontSize: baseSizes.body * scale,
             textDayFontSize: baseSizes.body * scale,
@@ -198,8 +175,8 @@ export default function CalendarScreen() {
             },
             'stylesheet.day.basic': {
               base: {
-                width: cellSize,
-                height: cellSize,
+                width: CELL_SIZE,
+                height: CELL_SIZE,
                 alignItems: 'center',
                 justifyContent: 'center',
               },
@@ -219,36 +196,30 @@ export default function CalendarScreen() {
         <LegendItem color={colors.border} label={t('calendar_legend_future')} textColor={colors.textSecondary} scale={scale} />
       </View>
 
-      {/* Bottom sheet */}
-      <Modal transparent visible={sheetVisible} onRequestClose={closeSheet} animationType="none">
-        <TouchableOpacity style={s.backdrop} activeOpacity={1} onPress={closeSheet} />
-        <Animated.View
-          style={[s.sheet, { backgroundColor: colors.bg, transform: [{ translateY: slideY }] }]}
-        >
-          <View style={[s.sheetHandle, { backgroundColor: colors.border }]} />
-          <Text style={[s.sheetDate, { color: colors.textPrimary, fontSize: baseSizes.title * scale }]}>
-            {new Date(selectedDate + 'T12:00:00').toLocaleDateString(i18n.language, {
-              day: 'numeric',
-              month: 'long',
-            })}
-          </Text>
+      {/* Приёмы выбранного дня — часть экрана, без модалки и затемнения, обновляется мгновенно по тапу */}
+      <View style={[s.dayPanel, { backgroundColor: colors.bg, borderTopColor: colors.border }]}>
+        <Text style={[s.dayPanelDate, { color: colors.textPrimary, fontSize: baseSizes.body * scale }]}>
+          {new Date(selectedDate + 'T12:00:00').toLocaleDateString(i18n.language, {
+            day: 'numeric',
+            month: 'long',
+          })}
+        </Text>
 
-          {selectedEvents.length === 0 ? (
-            <Text style={{ color: colors.textMuted, fontSize: baseSizes.body * scale, textAlign: 'center', marginTop: 16 }}>
-              {t('calendar_day_empty')}
-            </Text>
-          ) : (
-            <FlatList
-              data={selectedEvents}
-              keyExtractor={(e) => e.id}
-              contentContainerStyle={{ gap: 8, paddingBottom: 24 }}
-              renderItem={({ item }) => (
-                <SheetEventRow event={item} colors={colors} scale={scale} t={t} />
-              )}
-            />
-          )}
-        </Animated.View>
-      </Modal>
+        {selectedEvents.length === 0 ? (
+          <Text style={{ color: colors.textMuted, fontSize: baseSizes.body * scale, textAlign: 'center', marginTop: 16 }}>
+            {t('calendar_day_empty')}
+          </Text>
+        ) : (
+          <FlatList
+            data={selectedEvents}
+            keyExtractor={(e) => e.id}
+            contentContainerStyle={{ gap: 8, paddingBottom: 12 }}
+            renderItem={({ item }) => (
+              <SheetEventRow event={item} colors={colors} scale={scale} t={t} />
+            )}
+          />
+        )}
+      </View>
     </SafeAreaView>
   );
 }
@@ -316,21 +287,13 @@ const s = StyleSheet.create({
   },
   legendItem: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   legendDot: { width: 12, height: 12, borderRadius: 6 },
-  backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)' },
-  sheet: {
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+  dayPanel: {
+    height: 240,
+    borderTopWidth: 1,
     padding: 20,
-    paddingTop: 12,
-    maxHeight: '60%',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 12,
+    paddingTop: 14,
   },
-  sheetHandle: { width: 36, height: 4, borderRadius: 2, alignSelf: 'center', marginBottom: 16 },
-  sheetDate: { fontWeight: '700', marginBottom: 16 },
+  dayPanelDate: { fontWeight: '700', marginBottom: 12 },
   sheetRow: {
     flexDirection: 'row',
     alignItems: 'center',

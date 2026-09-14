@@ -32,6 +32,11 @@ export async function getMedicationsCount(): Promise<number> {
   return row?.cnt ?? 0;
 }
 
+export async function updateMedicationPhoto(id: string, photoUri: string | null): Promise<void> {
+  const db = await getDb();
+  await db.runAsync('UPDATE medications SET photo_uri = ? WHERE id = ?', [photoUri, id]);
+}
+
 export async function deleteMedication(id: string): Promise<void> {
   const db = await getDb();
   await db.runAsync(

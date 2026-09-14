@@ -20,14 +20,14 @@ import { useScanFlowStore } from '../../store/scanFlowStore';
 import { calculateCourse } from '../../services/scheduleEngine';
 import type { Frequency } from '../../services/scheduleEngine';
 import { insertMedication } from '../../db/medications';
-import { scheduleIntakeNotifications } from '../../services/notifications';
-import { insertCourse } from '../../db/courses';
-import { insertIntakeEvents } from '../../db/intakes';
+import { scheduleIntakeNotifications, cancelNotificationsForMedication } from '../../services/notifications';
+import { insertCourse, updateCourseStatus } from '../../db/courses';
+import { insertIntakeEvents, deletePendingIntakesByCourse } from '../../db/intakes';
 import { useIntakesStore } from '../../store/intakesStore';
 import { generateId } from '../../utils/id';
-import type { RootStackParamList } from '../../navigation/RootNavigator';
+import type { ScanFlowParamList } from '../../navigation/ScanFlowNavigator';
 
-type Nav = NativeStackNavigationProp<RootStackParamList>;
+type Nav = NativeStackNavigationProp<ScanFlowParamList>;
 
 const TIMES_OPTIONS = [1, 2, 3];
 
@@ -149,6 +149,12 @@ export default function ScanScheduleScreen() {
           barcode: store.barcode,
           pills_per_pack: store.pillsPerPack,
         });
+      }
+
+      if (store.existingCourseId) {
+        await cancelNotificationsForMedication(medicationId);
+        await updateCourseStatus(store.existingCourseId, 'completed');
+        await deletePendingIntakesByCourse(store.existingCourseId);
       }
 
       const { durationDays, intakeEvents } = calculateCourse({

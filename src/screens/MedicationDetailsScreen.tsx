@@ -5,17 +5,19 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  Image,
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp, NativeStackScreenProps } from '@react-navigation/native-stack';
+import * as ImagePicker from 'expo-image-picker';
 import { useTheme } from '../context/ThemeContext';
 import { useFontScale } from '../context/FontScaleContext';
 import { baseSizes } from '../theme/typography';
 import { useTranslation } from 'react-i18next';
-import { getMedicationById, deleteMedication } from '../db/medications';
-import { getCourseByMedicationId, updateCourseStatus } from '../db/courses';
+import { getMedicationById, deleteMedication, updateMedicationPhoto } from '../db/medications';
+import { getCourseByMedicationId } from '../db/courses';
 import { useScanFlowStore } from '../store/scanFlowStore';
 import { useIntakesStore } from '../store/intakesStore';
 import { cancelNotificationsForMedication } from '../services/notifications';
@@ -75,6 +77,39 @@ export default function MedicationDetailsScreen() {
 
   const progress = stats && stats.total > 0 ? stats.taken / stats.total : 0;
 
+  const applyPhoto = async (uri: string | null) => {
+    if (!medication) return;
+    await updateMedicationPhoto(medication.id, uri);
+    setMedication({ ...medication, photo_uri: uri });
+  };
+
+  const pickFromCamera = async () => {
+    const res = await ImagePicker.launchCameraAsync({ allowsEditing: true, aspect: [1, 1], quality: 0.8 });
+    if (!res.canceled && res.assets[0]) await applyPhoto(res.assets[0].uri);
+  };
+
+  const pickFromGallery = async () => {
+    const res = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+    if (!res.canceled && res.assets[0]) await applyPhoto(res.assets[0].uri);
+  };
+
+  const choosePhoto = () => {
+    const buttons: { text: string; onPress?: () => void; style?: 'cancel' | 'destructive' }[] = [
+      { text: t('med_photo_camera'), onPress: pickFromCamera },
+      { text: t('scan_gallery'), onPress: pickFromGallery },
+    ];
+    if (medication?.photo_uri) {
+      buttons.push({ text: t('med_photo_remove'), style: 'destructive', onPress: () => applyPhoto(null) });
+    }
+    buttons.push({ text: t('cancel'), style: 'cancel' });
+    Alert.alert(t('med_photo_choose_title'), undefined, buttons);
+  };
+
   return (
     <SafeAreaView style={[s.root, { backgroundColor: colors.bg }]} edges={['top']}>
       <View style={s.header}>
@@ -86,9 +121,18 @@ export default function MedicationDetailsScreen() {
       <ScrollView contentContainerStyle={s.scroll}>
         {/* Крупная плашка */}
         <View style={[s.banner, { backgroundColor: colors.accentLight }]}>
-          <View style={[s.iconCircle, { backgroundColor: colors.accent }]}>
-            <Text style={{ fontSize: 36 }}>💊</Text>
-          </View>
+          <TouchableOpacity onPress={choosePhoto} activeOpacity={0.8}>
+            {medication.photo_uri ? (
+              <Image source={{ uri: medication.photo_uri }} style={s.iconCircle} resizeMode="cover" />
+            ) : (
+              <View style={[s.iconCircle, { backgroundColor: colors.accent }]}>
+                <Text style={{ fontSize: 36 }}>💊</Text>
+              </View>
+            )}
+            <View style={[s.editBadge, { backgroundColor: colors.accent, borderColor: colors.accentLight }]}>
+              <Text style={{ fontSize: 13 }}>✎</Text>
+            </View>
+          </TouchableOpacity>
           <Text style={[s.medName, { color: colors.textPrimary, fontSize: baseSizes.title * scale * 1.1 }]}>
             {medication.name}
           </Text>
@@ -134,17 +178,13 @@ export default function MedicationDetailsScreen() {
           </TouchableOpacity>
           <TouchableOpacity
             style={[s.actionBtn, { backgroundColor: colors.cardAlt, borderWidth: 1, borderColor: colors.border }]}
-            onPress={async () => {
-              await cancelNotificationsForMedication(medication.id);
-              if (course) {
-                await updateCourseStatus(course.id, 'completed');
-                await deletePendingIntakesByCourse(course.id);
-              }
+            onPress={() => {
               resetScan();
               setScanField('medicationName', medication.name);
               setScanField('pillsPerPack', medication.pills_per_pack);
               setScanField('existingMedicationId', medication.id);
-              navigation.navigate('ScanSchedule');
+              setScanField('existingCourseId', course?.id ?? null);
+              navigation.navigate('ScanFlow', { screen: 'ScanSchedule' });
             }}
           >
             <Text style={[s.actionBtnText, { color: colors.textPrimary, fontSize: baseSizes.button * scale }]}>
@@ -240,6 +280,17 @@ const s = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 4,
+  },
+  editBadge: {
+    position: 'absolute',
+    bottom: 2,
+    right: -2,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    borderWidth: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   medName: { fontWeight: '800', textAlign: 'center' },
   card: { borderRadius: 16, borderWidth: 1, padding: 14, gap: 8 },

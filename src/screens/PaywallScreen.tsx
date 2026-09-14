@@ -14,7 +14,21 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 import { useFontScale } from '../context/FontScaleContext';
 import { baseSizes } from '../theme/typography';
-import { useSubscription, FREE_COURSES_LIMIT, FREE_MEDS_LIMIT } from '../context/SubscriptionContext';
+import {
+  useSubscription,
+  getPlanPricing,
+  FREE_COURSES_LIMIT,
+  FREE_MEDS_LIMIT,
+} from '../context/SubscriptionContext';
+import type { SubscriptionPlan } from '../context/SubscriptionContext';
+
+const PLANS: SubscriptionPlan[] = ['monthly', 'semiannual', 'annual'];
+
+const PLAN_LABEL_KEY: Record<SubscriptionPlan, string> = {
+  monthly: 'paywall_plan_monthly',
+  semiannual: 'paywall_plan_semiannual',
+  annual: 'paywall_plan_annual',
+};
 
 export default function PaywallScreen() {
   const { colors } = useTheme();
@@ -23,11 +37,12 @@ export default function PaywallScreen() {
   const navigation = useNavigation();
   const { purchase, restorePurchases } = useSubscription();
   const [loading, setLoading] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan>('annual');
 
   const handlePurchase = async () => {
     setLoading(true);
     try {
-      const ok = await purchase();
+      const ok = await purchase(selectedPlan);
       if (ok) {
         Alert.alert('', t('paywall_success'));
         navigation.goBack();
@@ -127,14 +142,65 @@ export default function PaywallScreen() {
           />
         </View>
 
-        {/* Цена */}
-        <View style={[s.priceCard, { backgroundColor: colors.accentLight, borderColor: colors.accent }]}>
-          <Text style={[s.priceLabel, { color: colors.accentDark, fontSize: baseSizes.caption * scale }]}>
-            {t('paywall_premium_label').toUpperCase()}
-          </Text>
-          <Text style={[s.price, { color: colors.accentDark, fontSize: baseSizes.title * scale * 1.5 }]}>
-            {t('paywall_price')}
-          </Text>
+        {/* Выбор тарифа */}
+        <View style={s.plans}>
+          {PLANS.map((plan) => {
+            const pricing = getPlanPricing(plan);
+            const active = selectedPlan === plan;
+            const isBestValue = plan === 'annual';
+            return (
+              <TouchableOpacity
+                key={plan}
+                style={[
+                  s.planCard,
+                  {
+                    backgroundColor: active ? colors.accentLight : colors.cardAlt,
+                    borderColor: active ? colors.accent : colors.border,
+                    borderWidth: active ? 2 : 1,
+                  },
+                ]}
+                onPress={() => setSelectedPlan(plan)}
+                activeOpacity={0.85}
+              >
+                {isBestValue && (
+                  <View style={[s.bestBadge, { backgroundColor: colors.accent }]}>
+                    <Text style={s.bestBadgeText}>{t('paywall_best_value')}</Text>
+                  </View>
+                )}
+                <View style={s.planRow}>
+                  <View style={[s.radio, { borderColor: active ? colors.accent : colors.border }]}>
+                    {active && <View style={[s.radioDot, { backgroundColor: colors.accent }]} />}
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[s.planLabel, { color: colors.textPrimary, fontSize: baseSizes.body * scale }]}>
+                      {t(PLAN_LABEL_KEY[plan])}
+                    </Text>
+                    {pricing.discount > 0 ? (
+                      <Text style={{ color: colors.textSecondary, fontSize: baseSizes.caption * scale }}>
+                        {t('paywall_per_month_short', { price: `$${pricing.perMonthPrice.toFixed(2)}` })}
+                      </Text>
+                    ) : (
+                      <Text style={{ color: colors.textSecondary, fontSize: baseSizes.caption * scale }}>
+                        {t('paywall_price')}
+                      </Text>
+                    )}
+                  </View>
+                  <View style={{ alignItems: 'flex-end' }}>
+                    <Text style={[s.planPrice, { color: colors.textPrimary, fontSize: baseSizes.body * scale }]}>
+                      ${pricing.totalPrice.toFixed(2)}
+                    </Text>
+                    {pricing.discount > 0 && (
+                      <View style={[s.saveBadge, { backgroundColor: colors.successLight }]}>
+                        <Text style={{ color: colors.success, fontSize: baseSizes.caption * scale, fontWeight: '700' }}>
+                          {t('paywall_save_percent', { percent: Math.round(pricing.discount * 100) })}
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+                </View>
+              </TouchableOpacity>
+            );
+          })}
         </View>
 
         {/* Кнопка подписки */}
@@ -211,9 +277,34 @@ const s = StyleSheet.create({
   tableRow: { flexDirection: 'row', alignItems: 'center' },
   tableFeatureLabel: { flex: 2, paddingHorizontal: 12, paddingVertical: 12 },
   cellText: { textAlign: 'center' },
-  priceCard: { borderRadius: 16, borderWidth: 1.5, padding: 20, alignItems: 'center', gap: 4 },
-  priceLabel: { fontWeight: '600', letterSpacing: 0.5 },
-  price: { fontWeight: '800' },
+  plans: { gap: 10 },
+  planCard: {
+    borderRadius: 16,
+    padding: 14,
+    paddingTop: 18,
+  },
+  bestBadge: {
+    position: 'absolute',
+    top: -10,
+    left: 14,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 10,
+  },
+  bestBadgeText: { color: '#fff', fontSize: 11, fontWeight: '700' },
+  planRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  radio: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  radioDot: { width: 12, height: 12, borderRadius: 6 },
+  planLabel: { fontWeight: '700' },
+  planPrice: { fontWeight: '800' },
+  saveBadge: { marginTop: 4, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8 },
   btn: { padding: 16, borderRadius: 14, alignItems: 'center' },
   btnText: { color: '#fff', fontWeight: '700' },
   restoreBtn: { alignItems: 'center', paddingVertical: 8 },

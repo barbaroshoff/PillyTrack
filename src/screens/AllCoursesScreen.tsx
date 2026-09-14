@@ -6,6 +6,7 @@ import {
   FlatList,
   TouchableOpacity,
   RefreshControl,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
@@ -59,7 +60,7 @@ export default function AllCoursesScreen() {
           </Text>
           <TouchableOpacity
             style={[s.addBtn, { backgroundColor: colors.accent }]}
-            onPress={() => navigation.navigate('ScanCamera')}
+            onPress={() => navigation.navigate('ScanFlow', { screen: 'ScanCamera' })}
           >
             <Text style={[s.addBtnText, { fontSize: baseSizes.button * scale }]}>
               + {t('courses_add')}
@@ -111,9 +112,13 @@ function CourseCard({ course, onPress }: CardProps) {
       activeOpacity={0.75}
     >
       <View style={s.cardRow}>
-        <View style={[s.icon, { backgroundColor: colors.accentLight }]}>
-          <Text style={{ fontSize: 24 }}>💊</Text>
-        </View>
+        {course.photo_uri ? (
+          <Image source={{ uri: course.photo_uri }} style={s.icon} resizeMode="cover" />
+        ) : (
+          <View style={[s.icon, { backgroundColor: colors.accentLight }]}>
+            <Text style={{ fontSize: 24 }}>💊</Text>
+          </View>
+        )}
         <View style={s.cardInfo}>
           <Text
             style={[s.medName, { color: colors.textPrimary, fontSize: baseSizes.body * scale }]}

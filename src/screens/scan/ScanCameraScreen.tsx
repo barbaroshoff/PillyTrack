@@ -10,7 +10,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CameraView, useCameraPermissions } from 'expo-camera';
-import { useNavigation } from '@react-navigation/native';
+import * as ImagePicker from 'expo-image-picker';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
@@ -19,9 +20,9 @@ import { baseSizes } from '../../theme/typography';
 import { useScanFlowStore } from '../../store/scanFlowStore';
 import { recognizeMedicationFromPhoto } from '../../services/medicationAI';
 import { PROXY_URL } from '../../config';
-import type { RootStackParamList } from '../../navigation/RootNavigator';
+import type { ScanFlowParamList } from '../../navigation/ScanFlowNavigator';
 
-type Nav = NativeStackNavigationProp<RootStackParamList>;
+type Nav = NativeStackNavigationProp<ScanFlowParamList>;
 
 const { width } = Dimensions.get('window');
 const FRAME_W = width * 0.82;
@@ -32,7 +33,7 @@ const BORDER = 3;
 export default function ScanCameraScreen() {
   const { colors } = useTheme();
   const { scale } = useFontScale();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigation = useNavigation<Nav>();
   const [permission, requestPermission] = useCameraPermissions();
   const [processing, setProcessing] = useState(false);
@@ -40,7 +41,12 @@ export default function ScanCameraScreen() {
   const reset = useScanFlowStore((s) => s.reset);
   const setField = useScanFlowStore((s) => s.setField);
 
-  React.useEffect(() => { reset(); }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      reset();
+      setProcessing(false);
+    }, []),
+  );
 
   const handleCapture = async () => {
     if (processing || !cameraRef.current) return;
@@ -50,8 +56,28 @@ export default function ScanCameraScreen() {
       if (!photo) throw new Error(t('scan_error_title'));
 
       setField('photoUri', photo.uri);
-      const info = await recognizeMedicationFromPhoto(photo.uri, PROXY_URL);
+      const info = await recognizeMedicationFromPhoto(photo.uri, PROXY_URL, i18n.language);
       navigation.navigate('MedicationInfo', { info, photoUri: photo.uri });
+    } catch (e: any) {
+      Alert.alert(t('scan_error_title'), e.message ?? t('scan_error_body'));
+      setProcessing(false);
+    }
+  };
+
+  const pickFromGallery = async () => {
+    if (processing) return;
+    const res = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      quality: 0.75,
+    });
+    if (res.canceled || !res.assets[0]) return;
+
+    setProcessing(true);
+    try {
+      const uri = res.assets[0].uri;
+      setField('photoUri', uri);
+      const info = await recognizeMedicationFromPhoto(uri, PROXY_URL, i18n.language);
+      navigation.navigate('MedicationInfo', { info, photoUri: uri });
     } catch (e: any) {
       Alert.alert(t('scan_error_title'), e.message ?? t('scan_error_body'));
       setProcessing(false);
@@ -80,6 +106,11 @@ export default function ScanCameraScreen() {
             onPress={requestPermission}
           >
             <Text style={[s.btnText, { fontSize: baseSizes.button * scale }]}>{t('scan_allow')}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={s.textBtn} onPress={pickFromGallery}>
+            <Text style={{ color: colors.accent, fontSize: baseSizes.body * scale }}>
+              {t('scan_gallery')}
+            </Text>
           </TouchableOpacity>
           <TouchableOpacity style={s.textBtn} onPress={goManual}>
             <Text style={{ color: colors.accent, fontSize: baseSizes.body * scale }}>
@@ -144,7 +175,12 @@ export default function ScanCameraScreen() {
             )}
           </TouchableOpacity>
 
-          <View style={{ width: 64 }} />
+          <TouchableOpacity onPress={pickFromGallery} style={s.manualWrap} disabled={processing}>
+            <Text style={{ fontSize: 26 }}>🖼️</Text>
+            <Text style={[s.manualText, { fontSize: baseSizes.caption * scale }]}>
+              {t('scan_gallery')}
+            </Text>
+          </TouchableOpacity>
         </View>
       </SafeAreaView>
     </View>

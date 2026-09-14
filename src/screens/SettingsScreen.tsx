@@ -1,23 +1,47 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 import { useFontScale } from '../context/FontScaleContext';
 import { baseSizes, fontScales } from '../theme/typography';
 import { setLanguage, getLanguage } from '../i18n';
+import { useSubscription } from '../context/SubscriptionContext';
 import type { FontScaleKey } from '../theme';
 import type { AppLanguage } from '../i18n';
+import type { RootStackParamList } from '../navigation/RootNavigator';
+
+type Nav = NativeStackNavigationProp<RootStackParamList>;
+
+const PLAN_LABEL_KEY: Record<string, string> = {
+  monthly: 'paywall_plan_monthly',
+  semiannual: 'paywall_plan_semiannual',
+  annual: 'paywall_plan_annual',
+};
 
 const LANGUAGES: { code: AppLanguage; label: string; flag: string }[] = [
-  { code: 'ru', label: 'Русский', flag: '🇷🇺' },
   { code: 'en', label: 'English', flag: '🇬🇧' },
+  { code: 'ru', label: 'Русский', flag: '🇷🇺' },
   { code: 'es', label: 'Español', flag: '🇪🇸' },
   { code: 'fr', label: 'Français', flag: '🇫🇷' },
   { code: 'de', label: 'Deutsch', flag: '🇩🇪' },
   { code: 'it', label: 'Italiano', flag: '🇮🇹' },
+  { code: 'pt', label: 'Português', flag: '🇵🇹' },
   { code: 'pl', label: 'Polski', flag: '🇵🇱' },
   { code: 'uk', label: 'Українська', flag: '🇺🇦' },
+  { code: 'nl', label: 'Nederlands', flag: '🇳🇱' },
+  { code: 'tr', label: 'Türkçe', flag: '🇹🇷' },
+  { code: 'ro', label: 'Română', flag: '🇷🇴' },
+  { code: 'el', label: 'Ελληνικά', flag: '🇬🇷' },
+  { code: 'cs', label: 'Čeština', flag: '🇨🇿' },
+  { code: 'sv', label: 'Svenska', flag: '🇸🇪' },
+  { code: 'hu', label: 'Magyar', flag: '🇭🇺' },
+  { code: 'bg', label: 'Български', flag: '🇧🇬' },
+  { code: 'da', label: 'Dansk', flag: '🇩🇰' },
+  { code: 'fi', label: 'Suomi', flag: '🇫🇮' },
+  { code: 'sk', label: 'Slovenčina', flag: '🇸🇰' },
 ];
 
 const FONT_PRESETS: { key: FontScaleKey; labelKey: string; aaSize: number }[] = [
@@ -30,6 +54,8 @@ export default function SettingsScreen() {
   const { colors } = useTheme();
   const { scale, fontScale, setFontScale } = useFontScale();
   const { t, i18n } = useTranslation();
+  const navigation = useNavigation<Nav>();
+  const { isSubscribed, subscriptionInfo } = useSubscription();
 
   const currentLang = getLanguage();
 
@@ -45,8 +71,53 @@ export default function SettingsScreen() {
       </Text>
 
       <ScrollView contentContainerStyle={s.scroll}>
-        {/* Размер шрифта */}
+        {/* Подписка */}
         <Text style={[s.sectionLabel, { color: colors.textSecondary, fontSize: baseSizes.caption * scale }]}>
+          {t('settings_subscription').toUpperCase()}
+        </Text>
+        <TouchableOpacity
+          style={[
+            s.subCard,
+            {
+              backgroundColor: isSubscribed ? colors.accentLight : colors.cardAlt,
+              borderColor: isSubscribed ? colors.accent : colors.border,
+            },
+          ]}
+          onPress={() => navigation.navigate('Paywall')}
+          activeOpacity={0.85}
+        >
+          <View style={{ flex: 1 }}>
+            {isSubscribed && subscriptionInfo ? (
+              <>
+                <Text style={{ color: colors.accentDark, fontSize: baseSizes.body * scale, fontWeight: '700' }}>
+                  💎 {t('paywall_premium_label')} · {t(PLAN_LABEL_KEY[subscriptionInfo.plan] ?? 'paywall_plan_monthly')}
+                </Text>
+                <Text style={{ color: colors.textSecondary, fontSize: baseSizes.caption * scale, marginTop: 4 }}>
+                  {t('settings_subscription_active', {
+                    date: new Date(subscriptionInfo.expiresAt).toLocaleDateString(i18n.language, {
+                      day: 'numeric',
+                      month: 'long',
+                      year: 'numeric',
+                    }),
+                  })}
+                </Text>
+              </>
+            ) : (
+              <>
+                <Text style={{ color: colors.textPrimary, fontSize: baseSizes.body * scale, fontWeight: '700' }}>
+                  {t('settings_subscription_none')}
+                </Text>
+                <Text style={{ color: colors.textSecondary, fontSize: baseSizes.caption * scale, marginTop: 4 }}>
+                  {t('settings_subscription_get')}
+                </Text>
+              </>
+            )}
+          </View>
+          <Text style={{ color: colors.textMuted, fontSize: 18 }}>›</Text>
+        </TouchableOpacity>
+
+        {/* Размер шрифта */}
+        <Text style={[s.sectionLabel, { color: colors.textSecondary, fontSize: baseSizes.caption * scale, marginTop: 24 }]}>
           {t('settings_font_size').toUpperCase()}
         </Text>
         <View style={s.fontRow}>
@@ -137,6 +208,24 @@ export default function SettingsScreen() {
           onPress={() => Linking.openSettings()}
         />
 
+        {/* Общий доступ */}
+        <Text style={[s.sectionLabel, { color: colors.textSecondary, fontSize: baseSizes.caption * scale, marginTop: 24 }]}>
+          {t('settings_share').toUpperCase()}
+        </Text>
+        <SettingsRow
+          label={`✦ ${t('settings_share_owner')}`}
+          colors={colors}
+          scale={scale}
+          onPress={() => navigation.navigate(isSubscribed ? 'Share' : 'Paywall')}
+        />
+        <View style={{ height: 8 }} />
+        <SettingsRow
+          label={t('settings_share_viewer')}
+          colors={colors}
+          scale={scale}
+          onPress={() => navigation.navigate('ViewShared')}
+        />
+
         {/* О приложении */}
         <Text style={[s.sectionLabel, { color: colors.textSecondary, fontSize: baseSizes.caption * scale, marginTop: 24 }]}>
           {t('settings_about').toUpperCase()}
@@ -175,6 +264,14 @@ const s = StyleSheet.create({
   heading: { fontWeight: '700', margin: 20 },
   scroll: { paddingHorizontal: 16, paddingBottom: 40 },
   sectionLabel: { fontWeight: '600', letterSpacing: 0.5, marginBottom: 10 },
+  subCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 16,
+    borderWidth: 1.5,
+    padding: 16,
+    marginBottom: 8,
+  },
   fontRow: { flexDirection: 'row', gap: 10 },
   fontCard: {
     borderRadius: 16,

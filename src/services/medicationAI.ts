@@ -12,6 +12,7 @@ export interface MedicationInfo {
 export async function recognizeMedicationFromPhoto(
   photoUri: string,
   proxyUrl: string,
+  lang: string,
 ): Promise<MedicationInfo> {
   if (!proxyUrl) throw new Error('Сервер не настроен. Добавьте EXPO_PUBLIC_PROXY_URL в файл .env');
 
@@ -22,7 +23,7 @@ export async function recognizeMedicationFromPhoto(
   const response = await fetch(`${proxyUrl}/recognize`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ imageBase64: base64 }),
+    body: JSON.stringify({ imageBase64: base64, lang }),
   });
 
   if (!response.ok) {
