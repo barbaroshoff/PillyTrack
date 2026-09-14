@@ -5,6 +5,7 @@ import {
   StyleSheet,
   FlatList,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -101,6 +102,43 @@ function buildMarkedDates(
   return marked;
 }
 
+// Свой компонент дня вместо встроенного — библиотечный текст даты никак не удавалось
+// отцентровать в круге через marginTop/lineHeight (внутренние стили react-native-calendars
+// конфликтовали с нашими). Обычный Text по центру TouchableOpacity центруется штатным флексом
+// без всяких трюков — так же, как остальные круглые иконки в приложении.
+function DayCell({
+  date, state, marking, onPress, children, colors, scale,
+}: {
+  date: DateData;
+  state?: string;
+  marking?: any;
+  onPress?: (d: DateData) => void;
+  children: React.ReactNode;
+  colors: any;
+  scale: number;
+}) {
+  const isDisabled = state === 'disabled';
+  const isToday = state === 'today';
+  const custom = marking?.customStyles;
+
+  const textColor =
+    custom?.text?.color ?? (isDisabled ? colors.textMuted : isToday ? colors.accent : colors.textPrimary);
+  const fontWeight = custom?.text?.fontWeight ?? (isToday ? '700' : '400');
+
+  return (
+    <TouchableOpacity
+      activeOpacity={0.6}
+      disabled={isDisabled}
+      onPress={() => onPress?.(date)}
+      style={[s.dayCell, custom?.container]}
+    >
+      <Text style={{ fontSize: baseSizes.body * scale, color: textColor, fontWeight }}>
+        {children}
+      </Text>
+    </TouchableOpacity>
+  );
+}
+
 export default function CalendarScreen() {
   const { colors } = useTheme();
   const { scale } = useFontScale();
@@ -138,104 +176,95 @@ export default function CalendarScreen() {
 
   return (
     <SafeAreaView style={[s.root, { backgroundColor: colors.bg }]} edges={['top']}>
-      {/* Календарь занимает всю страницу; непрерывный вертикальный скролл, следующий месяц — прокруткой вниз.
-          Метки приёмов загружены сразу для всех месяцев, а не только для видимого. */}
-      <View style={s.calendarContainer}>
-        <CalendarList
-          pastScrollRange={12}
-          futureScrollRange={12}
-          calendarHeight={MONTH_HEIGHT}
-          showScrollIndicator
-          hideExtraDays={false}
-          showSixWeeks
-          markingType="custom"
-          markedDates={markedDates}
-          onDayPress={onDayPress}
-          theme={{
-            backgroundColor: colors.bg,
-            calendarBackground: colors.bg,
-            textSectionTitleColor: colors.textSecondary,
-            todayTextColor: colors.accent,
-            dayTextColor: colors.textPrimary,
-            textDisabledColor: colors.textMuted,
-            monthTextColor: colors.textPrimary,
-            textMonthFontWeight: '700',
-            textMonthFontSize: baseSizes.body * scale,
-            textDayFontSize: baseSizes.body * scale,
-            textDayHeaderFontSize: baseSizes.caption * scale,
-            'stylesheet.calendar.main': {
-              week: {
-                marginTop: ROW_MARGIN / 2,
-                marginBottom: ROW_MARGIN / 2,
-                flexDirection: 'row',
-                justifyContent: 'space-around',
-              },
-            },
-            'stylesheet.day.basic': {
-              base: {
-                width: CELL_SIZE,
-                height: CELL_SIZE,
-                alignItems: 'center',
-                justifyContent: 'center',
-              },
-              text: {
-                fontSize: baseSizes.body * scale,
-              },
-            },
-          } as any}
-        />
-      </View>
+      {/* Тап в любом месте календаря/легенды вне конкретной даты закрывает всплывающую карточку;
+          тап по самой дате обрабатывается её собственным TouchableOpacity раньше и сюда не доходит,
+          поэтому переключение на другую дату при открытой карточке работает, а не просто закрывает её. */}
+      <TouchableWithoutFeedback onPress={() => setPanelVisible(false)}>
+        <View style={{ flex: 1 }}>
+          {/* Календарь занимает всю страницу; непрерывный вертикальный скролл, следующий месяц — прокруткой вниз.
+              Метки приёмов загружены сразу для всех месяцев, а не только для видимого. */}
+          <View style={s.calendarContainer}>
+            <CalendarList
+              pastScrollRange={12}
+              futureScrollRange={12}
+              calendarHeight={MONTH_HEIGHT}
+              showScrollIndicator
+              hideExtraDays={false}
+              showSixWeeks
+              markingType="custom"
+              markedDates={markedDates}
+              onDayPress={onDayPress}
+              dayComponent={(props: any) => <DayCell {...props} colors={colors} scale={scale} />}
+              theme={{
+                backgroundColor: colors.bg,
+                calendarBackground: colors.bg,
+                textSectionTitleColor: colors.textSecondary,
+                todayTextColor: colors.accent,
+                dayTextColor: colors.textPrimary,
+                textDisabledColor: colors.textMuted,
+                monthTextColor: colors.textPrimary,
+                textMonthFontWeight: '700',
+                textMonthFontSize: baseSizes.body * scale,
+                textDayFontSize: baseSizes.body * scale,
+                textDayHeaderFontSize: baseSizes.caption * scale,
+                'stylesheet.calendar.main': {
+                  week: {
+                    marginTop: ROW_MARGIN / 2,
+                    marginBottom: ROW_MARGIN / 2,
+                    flexDirection: 'row',
+                    justifyContent: 'space-around',
+                  },
+                },
+              } as any}
+            />
+          </View>
 
-      {/* Легенда */}
-      <View style={[s.legend, { borderTopColor: colors.border }]}>
-        <LegendItem color={colors.success} label={t('calendar_legend_done')} textColor={colors.success} scale={scale} />
-        <LegendItem color={colors.warning} label={t('calendar_legend_missed')} textColor={colors.warning} scale={scale} />
-        <LegendItem color={colors.border} label={t('calendar_legend_future')} textColor={colors.textSecondary} scale={scale} />
-      </View>
+          {/* Легенда */}
+          <View style={[s.legend, { borderTopColor: colors.border }]}>
+            <LegendItem color={colors.success} label={t('calendar_legend_done')} textColor={colors.success} scale={scale} />
+            <LegendItem color={colors.warning} label={t('calendar_legend_missed')} textColor={colors.warning} scale={scale} />
+            <LegendItem color={colors.border} label={t('calendar_legend_future')} textColor={colors.textSecondary} scale={scale} />
+          </View>
+        </View>
+      </TouchableWithoutFeedback>
 
       {/* Приёмы выбранного дня — всплывающая карточка поверх календаря, без затемнения фона и без
-          анимационной задержки: появляется/исчезает мгновенно по тапу на дату / вне карточки. */}
+          анимационной задержки: появляется/исчезает мгновенно по тапу на дату / вне карточки. Крестик
+          и тап вне карточки закрывают её; тап по другой дате переключает карточку на неё (см. выше). */}
       {panelVisible && (
-        <>
-          <TouchableOpacity
-            style={StyleSheet.absoluteFill}
-            activeOpacity={1}
-            onPress={() => setPanelVisible(false)}
-          />
-          <View
-            style={[
-              s.dayPanel,
-              { backgroundColor: colors.bg, borderColor: colors.border, shadowColor: colors.textPrimary },
-            ]}
-          >
-            <View style={s.dayPanelHeader}>
-              <Text style={[s.dayPanelDate, { color: colors.textPrimary, fontSize: baseSizes.body * scale }]}>
-                {new Date(selectedDate + 'T12:00:00').toLocaleDateString(i18n.language, {
-                  day: 'numeric',
-                  month: 'long',
-                })}
-              </Text>
-              <TouchableOpacity onPress={() => setPanelVisible(false)} hitSlop={8}>
-                <Text style={{ color: colors.textMuted, fontSize: 20 }}>✕</Text>
-              </TouchableOpacity>
-            </View>
-
-            {selectedEvents.length === 0 ? (
-              <Text style={{ color: colors.textMuted, fontSize: baseSizes.body * scale, textAlign: 'center', marginTop: 16 }}>
-                {t('calendar_day_empty')}
-              </Text>
-            ) : (
-              <FlatList
-                data={selectedEvents}
-                keyExtractor={(e) => e.id}
-                contentContainerStyle={{ gap: 8, paddingBottom: 12 }}
-                renderItem={({ item }) => (
-                  <SheetEventRow event={item} colors={colors} scale={scale} t={t} />
-                )}
-              />
-            )}
+        <View
+          style={[
+            s.dayPanel,
+            { backgroundColor: colors.bg, borderColor: colors.border, shadowColor: colors.textPrimary },
+          ]}
+        >
+          <View style={s.dayPanelHeader}>
+            <Text style={[s.dayPanelDate, { color: colors.textPrimary, fontSize: baseSizes.body * scale }]}>
+              {new Date(selectedDate + 'T12:00:00').toLocaleDateString(i18n.language, {
+                day: 'numeric',
+                month: 'long',
+              })}
+            </Text>
+            <TouchableOpacity onPress={() => setPanelVisible(false)} hitSlop={8}>
+              <Text style={{ color: colors.textMuted, fontSize: 20 }}>✕</Text>
+            </TouchableOpacity>
           </View>
-        </>
+
+          {selectedEvents.length === 0 ? (
+            <Text style={{ color: colors.textMuted, fontSize: baseSizes.body * scale, textAlign: 'center', marginTop: 16 }}>
+              {t('calendar_day_empty')}
+            </Text>
+          ) : (
+            <FlatList
+              data={selectedEvents}
+              keyExtractor={(e) => e.id}
+              contentContainerStyle={{ gap: 8, paddingBottom: 12 }}
+              renderItem={({ item }) => (
+                <SheetEventRow event={item} colors={colors} scale={scale} t={t} />
+              )}
+            />
+          )}
+        </View>
       )}
     </SafeAreaView>
   );
@@ -295,6 +324,13 @@ function SheetEventRow({ event, colors, scale, t }: {
 const s = StyleSheet.create({
   root: { flex: 1 },
   calendarContainer: { flex: 1 },
+  dayCell: {
+    width: CELL_SIZE,
+    height: CELL_SIZE,
+    borderRadius: 999,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   legend: {
     flexDirection: 'row',
     justifyContent: 'center',
