@@ -183,7 +183,7 @@ export default function CalendarScreen() {
               text: {
                 marginTop: 0,
                 fontSize: baseSizes.body * scale,
-                lineHeight: baseSizes.body * scale,
+                lineHeight: CELL_SIZE,
                 includeFontPadding: false,
                 textAlignVertical: 'center',
               },
@@ -281,7 +281,7 @@ function SheetEventRow({ event, colors, scale, t }: {
 
 const s = StyleSheet.create({
   root: { flex: 1 },
-  calendarContainer: { flex: 2 },
+  calendarContainer: { flex: 3 },
   legend: {
     flexDirection: 'row',
     justifyContent: 'center',
