@@ -148,7 +148,7 @@ export default function CalendarScreen() {
           pastScrollRange={12}
           futureScrollRange={12}
           calendarHeight={MONTH_HEIGHT}
-          showScrollIndicator={false}
+          showScrollIndicator
           markingType="custom"
           markedDates={markedDates}
           onDayPress={onDayPress}
