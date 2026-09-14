@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -56,12 +56,15 @@ export default function SettingsScreen() {
   const { t, i18n } = useTranslation();
   const navigation = useNavigation<Nav>();
   const { isSubscribed, subscriptionInfo } = useSubscription();
+  const [langExpanded, setLangExpanded] = useState(false);
 
   const currentLang = getLanguage();
+  const currentLangInfo = LANGUAGES.find((l) => l.code === currentLang);
 
   const changeLang = async (lang: AppLanguage) => {
     await setLanguage(lang);
     await i18n.changeLanguage(lang);
+    setLangExpanded(false);
   };
 
   return (
@@ -165,37 +168,54 @@ export default function SettingsScreen() {
         <Text style={[s.sectionLabel, { color: colors.textSecondary, fontSize: baseSizes.caption * scale, marginTop: 24 }]}>
           {t('settings_language').toUpperCase()}
         </Text>
-        <View style={s.langGrid}>
-          {LANGUAGES.map(({ code, label, flag }) => {
-            const active = currentLang === code;
-            return (
-              <TouchableOpacity
-                key={code}
-                style={[
-                  s.langBtn,
-                  {
-                    backgroundColor: active ? colors.accent : colors.cardAlt,
-                    borderColor: active ? colors.accent : colors.border,
-                  },
-                ]}
-                onPress={() => changeLang(code)}
-              >
-                <Text style={{ fontSize: 22 }}>{flag}</Text>
-                <Text
-                  style={{
-                    color: active ? '#fff' : colors.textPrimary,
-                    fontWeight: '600',
-                    fontSize: baseSizes.caption * scale,
-                    marginTop: 4,
-                    textAlign: 'center',
-                  }}
+        <TouchableOpacity
+          style={[s.settingsRow, { backgroundColor: colors.cardAlt, borderColor: colors.border }]}
+          onPress={() => setLangExpanded((v) => !v)}
+        >
+          <Text style={{ color: colors.textPrimary, fontSize: baseSizes.body * scale }}>
+            {t('settings_language')}
+          </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <Text style={{ color: colors.textSecondary, fontSize: baseSizes.body * scale }}>
+              {currentLangInfo ? `${currentLangInfo.flag} ${currentLangInfo.label}` : ''}
+            </Text>
+            <Text style={{ color: colors.textMuted, fontSize: 18 }}>{langExpanded ? '⌃' : '›'}</Text>
+          </View>
+        </TouchableOpacity>
+
+        {langExpanded && (
+          <View style={[s.langGrid, { marginTop: 10 }]}>
+            {LANGUAGES.map(({ code, label, flag }) => {
+              const active = currentLang === code;
+              return (
+                <TouchableOpacity
+                  key={code}
+                  style={[
+                    s.langBtn,
+                    {
+                      backgroundColor: active ? colors.accent : colors.cardAlt,
+                      borderColor: active ? colors.accent : colors.border,
+                    },
+                  ]}
+                  onPress={() => changeLang(code)}
                 >
-                  {label}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
+                  <Text style={{ fontSize: 22 }}>{flag}</Text>
+                  <Text
+                    style={{
+                      color: active ? '#fff' : colors.textPrimary,
+                      fontWeight: '600',
+                      fontSize: baseSizes.caption * scale,
+                      marginTop: 4,
+                      textAlign: 'center',
+                    }}
+                  >
+                    {label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        )}
 
         {/* Уведомления */}
         <Text style={[s.sectionLabel, { color: colors.textSecondary, fontSize: baseSizes.caption * scale, marginTop: 24 }]}>

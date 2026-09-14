@@ -183,6 +183,9 @@ export default function CalendarScreen() {
               text: {
                 marginTop: 0,
                 fontSize: baseSizes.body * scale,
+                lineHeight: baseSizes.body * scale,
+                includeFontPadding: false,
+                textAlignVertical: 'center',
               },
             },
           } as any}
@@ -211,6 +214,7 @@ export default function CalendarScreen() {
           </Text>
         ) : (
           <FlatList
+            style={{ flex: 1 }}
             data={selectedEvents}
             keyExtractor={(e) => e.id}
             contentContainerStyle={{ gap: 8, paddingBottom: 12 }}
@@ -277,7 +281,7 @@ function SheetEventRow({ event, colors, scale, t }: {
 
 const s = StyleSheet.create({
   root: { flex: 1 },
-  calendarContainer: { flex: 1 },
+  calendarContainer: { flex: 2 },
   legend: {
     flexDirection: 'row',
     justifyContent: 'center',
@@ -288,7 +292,7 @@ const s = StyleSheet.create({
   legendItem: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   legendDot: { width: 12, height: 12, borderRadius: 6 },
   dayPanel: {
-    height: 240,
+    flex: 1,
     borderTopWidth: 1,
     padding: 20,
     paddingTop: 14,

@@ -112,29 +112,36 @@ export default function PaywallScreen() {
 
           {/* Строки */}
           <FeatureRow
-            label="💊 Курсы"
+            label={`💊 ${t('paywall_feature_courses')}`}
             free={`${FREE_COURSES_LIMIT}`}
             pro={t('paywall_feature_courses_pro')}
             colors={colors}
             scale={scale}
           />
           <FeatureRow
-            label="📦 Препараты"
+            label={`📦 ${t('paywall_feature_meds')}`}
             free={`${FREE_MEDS_LIMIT}`}
             pro={t('paywall_feature_meds_pro')}
             colors={colors}
             scale={scale}
           />
           <FeatureRow
-            label="🔔 Уведомления"
+            label={`🔔 ${t('paywall_feature_notifs')}`}
             free="✓"
             pro="✓"
             colors={colors}
             scale={scale}
           />
           <FeatureRow
-            label="📅 Календарь"
+            label={`📅 ${t('paywall_feature_calendar')}`}
             free="✓"
+            pro="✓"
+            colors={colors}
+            scale={scale}
+          />
+          <FeatureRow
+            label={`🤝 ${t('paywall_feature_share')}`}
+            free="—"
             pro="✓"
             colors={colors}
             scale={scale}
