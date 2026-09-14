@@ -14,7 +14,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 import { useFontScale } from '../context/FontScaleContext';
 import { baseSizes } from '../theme/typography';
-import { getIntakesForMonth } from '../db/intakes';
+import { getAllIntakes } from '../db/intakes';
 import type { IntakeEvent } from '../db/intakes';
 
 type MarkedDates = Record<string, any>;
@@ -77,7 +77,6 @@ function buildMarkedDates(
         text: {
           color: textColor,
           fontWeight: (allTaken || isSelected) ? '700' : '400',
-          marginTop: 0,
         },
       },
     };
@@ -93,7 +92,7 @@ function buildMarkedDates(
           borderColor: colors.accent,
           borderRadius: 999,
         },
-        text: { color: '#fff', fontWeight: '700', marginTop: 0 },
+        text: { color: '#fff', fontWeight: '700' },
       },
     };
   }
@@ -107,19 +106,18 @@ export default function CalendarScreen() {
   const { t, i18n } = useTranslation();
 
   const todayStr = new Date().toISOString().slice(0, 10);
-  const [currentMonth, setCurrentMonth] = useState(todayStr.slice(0, 7));
   const [selectedDate, setSelectedDate] = useState(todayStr);
   const [events, setEvents] = useState<IntakeEvent[]>([]);
   const isFocused = useIsFocused();
 
-  const load = useCallback(async (month: string) => {
-    const data = await getIntakesForMonth(month);
+  const load = useCallback(async () => {
+    const data = await getAllIntakes();
     setEvents(data);
   }, []);
 
   useEffect(() => {
-    if (isFocused) load(currentMonth);
-  }, [isFocused, currentMonth, load]);
+    if (isFocused) load();
+  }, [isFocused, load]);
 
   const markedDates = useMemo(
     () => buildMarkedDates(events, selectedDate, colors),
@@ -135,14 +133,10 @@ export default function CalendarScreen() {
     setSelectedDate(day.dateString);
   };
 
-  const onMonthChange = (month: DateData) => {
-    const ym = `${month.year}-${String(month.month).padStart(2, '0')}`;
-    setCurrentMonth(ym);
-  };
-
   return (
     <SafeAreaView style={[s.root, { backgroundColor: colors.bg }]} edges={['top']}>
-      {/* Календарь — непрерывный вертикальный скролл, следующий месяц открывается прокруткой вниз */}
+      {/* Календарь — непрерывный вертикальный скролл, следующий месяц открывается прокруткой вниз.
+          Метки приёмов загружены сразу для всех месяцев, а не только для видимого. */}
       <View style={s.calendarContainer}>
         <CalendarList
           pastScrollRange={12}
@@ -152,7 +146,6 @@ export default function CalendarScreen() {
           markingType="custom"
           markedDates={markedDates}
           onDayPress={onDayPress}
-          onMonthChange={onMonthChange}
           theme={{
             backgroundColor: colors.bg,
             calendarBackground: colors.bg,
@@ -181,11 +174,7 @@ export default function CalendarScreen() {
                 justifyContent: 'center',
               },
               text: {
-                marginTop: 0,
                 fontSize: baseSizes.body * scale,
-                lineHeight: CELL_SIZE,
-                includeFontPadding: false,
-                textAlignVertical: 'center',
               },
             },
           } as any}
@@ -281,7 +270,7 @@ function SheetEventRow({ event, colors, scale, t }: {
 
 const s = StyleSheet.create({
   root: { flex: 1 },
-  calendarContainer: { flex: 3 },
+  calendarContainer: { flex: 2.5 },
   legend: {
     flexDirection: 'row',
     justifyContent: 'center',

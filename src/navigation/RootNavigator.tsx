@@ -27,7 +27,7 @@ export default function RootNavigator() {
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Tabs" component={TabNavigator} />
         <Stack.Screen name="Paywall" component={PaywallScreen} />
-        <Stack.Screen name="ScanFlow" component={ScanFlowNavigator} options={{ presentation: 'modal' }} />
+        <Stack.Screen name="ScanFlow" component={ScanFlowNavigator} />
         <Stack.Screen name="RenewCourse" component={RenewCourseScreen} />
         <Stack.Screen name="MedicationDetails" component={MedicationDetailsScreen} />
         <Stack.Screen name="Share" component={ShareScreen} />

@@ -69,17 +69,15 @@ export async function getIntakeStatsByCourse(courseId: string): Promise<IntakeSt
   };
 }
 
-export async function getIntakesForMonth(yearMonth: string): Promise<IntakeEvent[]> {
+export async function getAllIntakes(): Promise<IntakeEvent[]> {
   const db = await getDb();
   return db.getAllAsync<IntakeEvent>(
     `SELECT ie.*, m.name as medication_name
      FROM intake_events ie
      JOIN courses c ON ie.course_id = c.id
      JOIN medications m ON c.medication_id = m.id
-     WHERE ie.scheduled_at LIKE ?
-       AND (c.status = 'active' OR ie.status != 'pending')
+     WHERE (c.status = 'active' OR ie.status != 'pending')
      ORDER BY ie.scheduled_at`,
-    [`${yearMonth}%`],
   );
 }
 

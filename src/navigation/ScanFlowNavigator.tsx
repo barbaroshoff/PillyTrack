@@ -17,9 +17,8 @@ export type ScanFlowParamList = {
 
 const Stack = createNativeStackNavigator<ScanFlowParamList>();
 
-// Весь флоу сканирования показывается как ОДНО модальное окно (см. options={{ presentation: 'modal' }}
-// на экране 'ScanFlow' в RootNavigator). Внутри — обычный push (card), чтобы шаги флоу не открывались
-// каждый как новое модальное окно поверх предыдущего.
+// Все шаги флоу сканирования — обычный push (card) внутри одного вложенного навигатора,
+// без модальных презентаций: каждый экран открывается как новая страница, а не как окно поверх предыдущей.
 export default function ScanFlowNavigator() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
