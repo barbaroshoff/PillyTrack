@@ -170,67 +170,73 @@ export default function CalendarScreen() {
   );
 
   const onDayPress = (day: DateData) => {
+    if (panelVisible && day.dateString === selectedDate) {
+      setPanelVisible(false);
+      return;
+    }
     setSelectedDate(day.dateString);
     setPanelVisible(true);
   };
 
+  const renderDayCell = useCallback(
+    (props: any) => <DayCell {...props} colors={colors} scale={scale} />,
+    [colors, scale],
+  );
+
   return (
     <SafeAreaView style={[s.root, { backgroundColor: colors.bg }]} edges={['top']}>
-      {/* Тап в любом месте календаря/легенды вне конкретной даты закрывает всплывающую карточку;
-          тап по самой дате обрабатывается её собственным TouchableOpacity раньше и сюда не доходит,
-          поэтому переключение на другую дату при открытой карточке работает, а не просто закрывает её. */}
-      <TouchableWithoutFeedback onPress={() => setPanelVisible(false)}>
-        <View style={{ flex: 1 }}>
-          {/* Календарь занимает всю страницу; непрерывный вертикальный скролл, следующий месяц — прокруткой вниз.
-              Метки приёмов загружены сразу для всех месяцев, а не только для видимого. */}
-          <View style={s.calendarContainer}>
-            <CalendarList
-              pastScrollRange={12}
-              futureScrollRange={12}
-              calendarHeight={MONTH_HEIGHT}
-              showScrollIndicator
-              hideExtraDays={false}
-              showSixWeeks
-              markingType="custom"
-              markedDates={markedDates}
-              onDayPress={onDayPress}
-              dayComponent={(props: any) => <DayCell {...props} colors={colors} scale={scale} />}
-              theme={{
-                backgroundColor: colors.bg,
-                calendarBackground: colors.bg,
-                textSectionTitleColor: colors.textSecondary,
-                todayTextColor: colors.accent,
-                dayTextColor: colors.textPrimary,
-                textDisabledColor: colors.textMuted,
-                monthTextColor: colors.textPrimary,
-                textMonthFontWeight: '700',
-                textMonthFontSize: baseSizes.body * scale,
-                textDayFontSize: baseSizes.body * scale,
-                textDayHeaderFontSize: baseSizes.caption * scale,
-                'stylesheet.calendar.main': {
-                  week: {
-                    marginTop: ROW_MARGIN / 2,
-                    marginBottom: ROW_MARGIN / 2,
-                    flexDirection: 'row',
-                    justifyContent: 'space-around',
-                  },
-                },
-              } as any}
-            />
-          </View>
+      {/* Календарь занимает всю страницу; непрерывный вертикальный скролл, следующий месяц — прокруткой вниз.
+          Метки приёмов загружены сразу для всех месяцев, а не только для видимого. Календарь НЕ обёрнут
+          в Touchable — оборачивание скроллящегося списка в Touchable вызывает задержку скролла из-за
+          конкуренции за responder между жестом скролла и тапом. */}
+      <View style={s.calendarContainer}>
+        <CalendarList
+          pastScrollRange={12}
+          futureScrollRange={12}
+          calendarHeight={MONTH_HEIGHT}
+          showScrollIndicator
+          hideExtraDays={false}
+          showSixWeeks
+          markingType="custom"
+          markedDates={markedDates}
+          onDayPress={onDayPress}
+          dayComponent={renderDayCell}
+          theme={{
+            backgroundColor: colors.bg,
+            calendarBackground: colors.bg,
+            textSectionTitleColor: colors.textSecondary,
+            todayTextColor: colors.accent,
+            dayTextColor: colors.textPrimary,
+            textDisabledColor: colors.textMuted,
+            monthTextColor: colors.textPrimary,
+            textMonthFontWeight: '700',
+            textMonthFontSize: baseSizes.body * scale,
+            textDayFontSize: baseSizes.body * scale,
+            textDayHeaderFontSize: baseSizes.caption * scale,
+            'stylesheet.calendar.main': {
+              week: {
+                marginTop: ROW_MARGIN / 2,
+                marginBottom: ROW_MARGIN / 2,
+                flexDirection: 'row',
+                justifyContent: 'space-around',
+              },
+            },
+          } as any}
+        />
+      </View>
 
-          {/* Легенда */}
-          <View style={[s.legend, { borderTopColor: colors.border }]}>
-            <LegendItem color={colors.success} label={t('calendar_legend_done')} textColor={colors.success} scale={scale} />
-            <LegendItem color={colors.warning} label={t('calendar_legend_missed')} textColor={colors.warning} scale={scale} />
-            <LegendItem color={colors.border} label={t('calendar_legend_future')} textColor={colors.textSecondary} scale={scale} />
-          </View>
+      {/* Легенда — не скроллится, поэтому оборачивать её в Touchable безопасно для тапа "закрыть карточку" */}
+      <TouchableWithoutFeedback onPress={() => setPanelVisible(false)}>
+        <View style={[s.legend, { borderTopColor: colors.border }]}>
+          <LegendItem color={colors.success} label={t('calendar_legend_done')} textColor={colors.success} scale={scale} />
+          <LegendItem color={colors.warning} label={t('calendar_legend_missed')} textColor={colors.warning} scale={scale} />
+          <LegendItem color={colors.border} label={t('calendar_legend_future')} textColor={colors.textSecondary} scale={scale} />
         </View>
       </TouchableWithoutFeedback>
 
       {/* Приёмы выбранного дня — всплывающая карточка поверх календаря, без затемнения фона и без
-          анимационной задержки: появляется/исчезает мгновенно по тапу на дату / вне карточки. Крестик
-          и тап вне карточки закрывают её; тап по другой дате переключает карточку на неё (см. выше). */}
+          анимационной задержки: появляется/исчезает мгновенно. Закрывается крестиком, тапом по легенде
+          или повторным тапом по уже открытой дате; тап по другой дате переключает карточку на неё. */}
       {panelVisible && (
         <View
           style={[
