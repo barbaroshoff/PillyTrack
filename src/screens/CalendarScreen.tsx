@@ -147,6 +147,7 @@ export default function CalendarScreen() {
           calendarHeight={MONTH_HEIGHT}
           showScrollIndicator
           hideExtraDays={false}
+          showSixWeeks
           markingType="custom"
           markedDates={markedDates}
           onDayPress={onDayPress}
