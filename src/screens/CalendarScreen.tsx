@@ -4,6 +4,7 @@ import {
   Text,
   StyleSheet,
   FlatList,
+  TouchableOpacity,
   Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -108,6 +109,7 @@ export default function CalendarScreen() {
   const todayStr = new Date().toISOString().slice(0, 10);
   const [selectedDate, setSelectedDate] = useState(todayStr);
   const [events, setEvents] = useState<IntakeEvent[]>([]);
+  const [panelVisible, setPanelVisible] = useState(false);
   const isFocused = useIsFocused();
 
   const load = useCallback(async () => {
@@ -131,11 +133,12 @@ export default function CalendarScreen() {
 
   const onDayPress = (day: DateData) => {
     setSelectedDate(day.dateString);
+    setPanelVisible(true);
   };
 
   return (
     <SafeAreaView style={[s.root, { backgroundColor: colors.bg }]} edges={['top']}>
-      {/* Календарь — непрерывный вертикальный скролл, следующий месяц открывается прокруткой вниз.
+      {/* Календарь занимает всю страницу; непрерывный вертикальный скролл, следующий месяц — прокруткой вниз.
           Метки приёмов загружены сразу для всех месяцев, а не только для видимого. */}
       <View style={s.calendarContainer}>
         <CalendarList
@@ -143,6 +146,7 @@ export default function CalendarScreen() {
           futureScrollRange={12}
           calendarHeight={MONTH_HEIGHT}
           showScrollIndicator
+          hideExtraDays={false}
           markingType="custom"
           markedDates={markedDates}
           onDayPress={onDayPress}
@@ -188,31 +192,50 @@ export default function CalendarScreen() {
         <LegendItem color={colors.border} label={t('calendar_legend_future')} textColor={colors.textSecondary} scale={scale} />
       </View>
 
-      {/* Приёмы выбранного дня — часть экрана, без модалки и затемнения, обновляется мгновенно по тапу */}
-      <View style={[s.dayPanel, { backgroundColor: colors.bg, borderTopColor: colors.border }]}>
-        <Text style={[s.dayPanelDate, { color: colors.textPrimary, fontSize: baseSizes.body * scale }]}>
-          {new Date(selectedDate + 'T12:00:00').toLocaleDateString(i18n.language, {
-            day: 'numeric',
-            month: 'long',
-          })}
-        </Text>
-
-        {selectedEvents.length === 0 ? (
-          <Text style={{ color: colors.textMuted, fontSize: baseSizes.body * scale, textAlign: 'center', marginTop: 16 }}>
-            {t('calendar_day_empty')}
-          </Text>
-        ) : (
-          <FlatList
-            style={{ flex: 1 }}
-            data={selectedEvents}
-            keyExtractor={(e) => e.id}
-            contentContainerStyle={{ gap: 8, paddingBottom: 12 }}
-            renderItem={({ item }) => (
-              <SheetEventRow event={item} colors={colors} scale={scale} t={t} />
-            )}
+      {/* Приёмы выбранного дня — всплывающая карточка поверх календаря, без затемнения фона и без
+          анимационной задержки: появляется/исчезает мгновенно по тапу на дату / вне карточки. */}
+      {panelVisible && (
+        <>
+          <TouchableOpacity
+            style={StyleSheet.absoluteFill}
+            activeOpacity={1}
+            onPress={() => setPanelVisible(false)}
           />
-        )}
-      </View>
+          <View
+            style={[
+              s.dayPanel,
+              { backgroundColor: colors.bg, borderColor: colors.border, shadowColor: colors.textPrimary },
+            ]}
+          >
+            <View style={s.dayPanelHeader}>
+              <Text style={[s.dayPanelDate, { color: colors.textPrimary, fontSize: baseSizes.body * scale }]}>
+                {new Date(selectedDate + 'T12:00:00').toLocaleDateString(i18n.language, {
+                  day: 'numeric',
+                  month: 'long',
+                })}
+              </Text>
+              <TouchableOpacity onPress={() => setPanelVisible(false)} hitSlop={8}>
+                <Text style={{ color: colors.textMuted, fontSize: 20 }}>✕</Text>
+              </TouchableOpacity>
+            </View>
+
+            {selectedEvents.length === 0 ? (
+              <Text style={{ color: colors.textMuted, fontSize: baseSizes.body * scale, textAlign: 'center', marginTop: 16 }}>
+                {t('calendar_day_empty')}
+              </Text>
+            ) : (
+              <FlatList
+                data={selectedEvents}
+                keyExtractor={(e) => e.id}
+                contentContainerStyle={{ gap: 8, paddingBottom: 12 }}
+                renderItem={({ item }) => (
+                  <SheetEventRow event={item} colors={colors} scale={scale} t={t} />
+                )}
+              />
+            )}
+          </View>
+        </>
+      )}
     </SafeAreaView>
   );
 }
@@ -270,7 +293,7 @@ function SheetEventRow({ event, colors, scale, t }: {
 
 const s = StyleSheet.create({
   root: { flex: 1 },
-  calendarContainer: { flex: 2.5 },
+  calendarContainer: { flex: 1 },
   legend: {
     flexDirection: 'row',
     justifyContent: 'center',
@@ -281,12 +304,27 @@ const s = StyleSheet.create({
   legendItem: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   legendDot: { width: 12, height: 12, borderRadius: 6 },
   dayPanel: {
-    flex: 1,
-    borderTopWidth: 1,
+    position: 'absolute',
+    left: 12,
+    right: 12,
+    bottom: 20,
+    maxHeight: '55%',
+    borderWidth: 1,
+    borderRadius: 20,
     padding: 20,
-    paddingTop: 14,
+    paddingTop: 16,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    elevation: 8,
   },
-  dayPanelDate: { fontWeight: '700', marginBottom: 12 },
+  dayPanelHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  dayPanelDate: { fontWeight: '700' },
   sheetRow: {
     flexDirection: 'row',
     alignItems: 'center',
