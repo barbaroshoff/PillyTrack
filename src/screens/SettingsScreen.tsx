@@ -1,14 +1,28 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Linking } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  Linking,
+  Switch,
+  ActivityIndicator,
+  Alert,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
+import type { ThemeMode } from '../context/ThemeContext';
 import { useFontScale } from '../context/FontScaleContext';
 import { baseSizes, fontScales } from '../theme/typography';
 import { setLanguage, getLanguage } from '../i18n';
 import { useSubscription } from '../context/SubscriptionContext';
+import { getAutoExportEnabled, setAutoExportEnabled } from '../services/autoExport';
+import { shareIntakeHistoryPdf, getLastExportInfo, buildReportLabels } from '../services/pdfExport';
+import type { LastExportInfo } from '../services/pdfExport';
 import type { FontScaleKey } from '../theme';
 import type { AppLanguage } from '../i18n';
 import type { RootStackParamList } from '../navigation/RootNavigator';
@@ -50,13 +64,59 @@ const FONT_PRESETS: { key: FontScaleKey; labelKey: string; aaSize: number }[] = 
   { key: 'xlarge', labelKey: 'settings_font_xlarge', aaSize: 26 },
 ];
 
+const THEME_OPTIONS: { key: ThemeMode; labelKey: string; icon: string }[] = [
+  { key: 'system', labelKey: 'settings_theme_system', icon: '⚙️' },
+  { key: 'light', labelKey: 'settings_theme_light', icon: '☀️' },
+  { key: 'dark', labelKey: 'settings_theme_dark', icon: '🌙' },
+];
+
 export default function SettingsScreen() {
-  const { colors } = useTheme();
+  const { colors, themeMode, setThemeMode } = useTheme();
   const { scale, fontScale, setFontScale } = useFontScale();
   const { t, i18n } = useTranslation();
   const navigation = useNavigation<Nav>();
   const { isSubscribed, subscriptionInfo } = useSubscription();
   const [langExpanded, setLangExpanded] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const [autoExportOn, setAutoExportOn] = useState(false);
+  const [lastExport, setLastExport] = useState<LastExportInfo | null>(null);
+
+  const refreshExportState = useCallback(async () => {
+    const [enabled, last] = await Promise.all([getAutoExportEnabled(), getLastExportInfo()]);
+    setAutoExportOn(enabled);
+    setLastExport(last);
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      refreshExportState();
+    }, [refreshExportState]),
+  );
+
+  const handleExportPdf = async () => {
+    if (!isSubscribed) {
+      navigation.navigate('Paywall');
+      return;
+    }
+    setExporting(true);
+    try {
+      await shareIntakeHistoryPdf(buildReportLabels(t, i18n.language));
+      await refreshExportState();
+    } catch {
+      Alert.alert(t('error'), t('export_pdf_error'));
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const handleToggleAutoExport = async (value: boolean) => {
+    if (!isSubscribed) {
+      navigation.navigate('Paywall');
+      return;
+    }
+    setAutoExportOn(value);
+    await setAutoExportEnabled(value);
+  };
 
   const currentLang = getLanguage();
   const currentLangInfo = LANGUAGES.find((l) => l.code === currentLang);
@@ -74,8 +134,44 @@ export default function SettingsScreen() {
       </Text>
 
       <ScrollView contentContainerStyle={s.scroll}>
-        {/* Подписка */}
+        {/* Тема оформления */}
         <Text style={[s.sectionLabel, { color: colors.textSecondary, fontSize: baseSizes.caption * scale }]}>
+          {t('settings_theme').toUpperCase()}
+        </Text>
+        <View style={s.fontRow}>
+          {THEME_OPTIONS.map(({ key, labelKey, icon }) => {
+            const active = themeMode === key;
+            return (
+              <TouchableOpacity
+                key={key}
+                style={[
+                  s.fontCard,
+                  {
+                    borderColor: active ? colors.accent : colors.border,
+                    backgroundColor: active ? colors.accentLight : colors.cardAlt,
+                    flex: 1,
+                  },
+                ]}
+                onPress={() => setThemeMode(key)}
+              >
+                <Text style={{ fontSize: 22, marginBottom: 6 }}>{icon}</Text>
+                <Text
+                  style={{
+                    fontSize: baseSizes.caption * scale,
+                    color: active ? colors.accentDark : colors.textSecondary,
+                    fontWeight: active ? '600' : '400',
+                    textAlign: 'center',
+                  }}
+                >
+                  {t(labelKey)}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+
+        {/* Подписка */}
+        <Text style={[s.sectionLabel, { color: colors.textSecondary, fontSize: baseSizes.caption * scale, marginTop: 24 }]}>
           {t('settings_subscription').toUpperCase()}
         </Text>
         <TouchableOpacity
@@ -245,6 +341,65 @@ export default function SettingsScreen() {
           scale={scale}
           onPress={() => navigation.navigate('ViewShared')}
         />
+
+        {/* Экспорт */}
+        <Text style={[s.sectionLabel, { color: colors.textSecondary, fontSize: baseSizes.caption * scale, marginTop: 24 }]}>
+          {t('settings_export').toUpperCase()}
+        </Text>
+        <TouchableOpacity
+          style={[s.settingsRow, { backgroundColor: colors.cardAlt, borderColor: colors.border }]}
+          onPress={handleExportPdf}
+          disabled={exporting}
+        >
+          <Text style={{ color: colors.textPrimary, fontSize: baseSizes.body * scale }}>
+            ✦ {t('settings_export_pdf')}
+          </Text>
+          {exporting ? (
+            <ActivityIndicator color={colors.accent} />
+          ) : (
+            <Text style={{ color: colors.textMuted, fontSize: 18 }}>›</Text>
+          )}
+        </TouchableOpacity>
+
+        <View style={{ height: 8 }} />
+
+        <View
+          style={[
+            s.settingsRow,
+            { backgroundColor: colors.cardAlt, borderColor: colors.border, alignItems: 'flex-start' },
+          ]}
+        >
+          <View style={{ flex: 1, marginRight: 12 }}>
+            <Text style={{ color: colors.textPrimary, fontSize: baseSizes.body * scale }}>
+              ✦ {t('settings_auto_export')}
+            </Text>
+            <Text style={{ color: colors.textSecondary, fontSize: baseSizes.caption * scale, marginTop: 4 }}>
+              {t('settings_auto_export_desc')}
+            </Text>
+          </View>
+          <Switch
+            value={autoExportOn}
+            onValueChange={handleToggleAutoExport}
+            trackColor={{ false: colors.border, true: colors.accent }}
+            thumbColor="#fff"
+          />
+        </View>
+
+        <Text
+          style={{
+            color: colors.textMuted,
+            fontSize: baseSizes.caption * scale,
+            marginTop: 8,
+            paddingHorizontal: 4,
+          }}
+        >
+          {lastExport
+            ? t('settings_last_export', {
+                date: new Date(lastExport.at).toLocaleString(i18n.language),
+                filename: lastExport.filename,
+              })
+            : t('settings_last_export_none')}
+        </Text>
 
         {/* О приложении */}
         <Text style={[s.sectionLabel, { color: colors.textSecondary, fontSize: baseSizes.caption * scale, marginTop: 24 }]}>

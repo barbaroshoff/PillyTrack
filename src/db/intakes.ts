@@ -69,6 +69,18 @@ export async function getIntakeStatsByCourse(courseId: string): Promise<IntakeSt
   };
 }
 
+export async function getIntakeHistory(): Promise<IntakeEvent[]> {
+  const db = await getDb();
+  return db.getAllAsync<IntakeEvent>(
+    `SELECT ie.*, m.name as medication_name
+     FROM intake_events ie
+     JOIN courses c ON ie.course_id = c.id
+     JOIN medications m ON c.medication_id = m.id
+     WHERE ie.status != 'pending'
+     ORDER BY ie.scheduled_at DESC`,
+  );
+}
+
 export async function getAllIntakes(): Promise<IntakeEvent[]> {
   const db = await getDb();
   return db.getAllAsync<IntakeEvent>(

@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { AppState } from 'react-native';
 import * as Notifications from 'expo-notifications';
-import { ThemeProvider } from './src/context/ThemeContext';
-import { SubscriptionProvider } from './src/context/SubscriptionContext';
+import { StatusBar } from 'expo-status-bar';
+import { useTranslation } from 'react-i18next';
+import { ThemeProvider, useTheme } from './src/context/ThemeContext';
+import { SubscriptionProvider, useSubscription } from './src/context/SubscriptionContext';
 import RootNavigator from './src/navigation/RootNavigator';
 import { useIntakesStore } from './src/store/intakesStore';
 import { initI18n } from './src/i18n';
@@ -12,6 +14,8 @@ import {
   markOverdueIntakes,
 } from './src/services/notifications';
 import { getPendingIntakes } from './src/db/intakes';
+import { runAutoExportIfDue } from './src/services/autoExport';
+import { buildReportLabels } from './src/services/pdfExport';
 import DisclaimerModal, { useDisclaimerState } from './src/components/DisclaimerModal';
 
 Notifications.setNotificationHandler({
@@ -25,6 +29,9 @@ Notifications.setNotificationHandler({
 });
 
 function AppInit() {
+  const { isDark } = useTheme();
+  const { isSubscribed, isLoading: subLoading } = useSubscription();
+  const { t, i18n } = useTranslation();
   const loadToday = useIntakesStore((s) => s.loadToday);
   const appState = useRef(AppState.currentState);
   const { accepted, accept } = useDisclaimerState();
@@ -54,10 +61,16 @@ function AppInit() {
     };
   }, [loadToday]);
 
+  useEffect(() => {
+    if (!i18nReady || subLoading) return;
+    runAutoExportIfDue(isSubscribed, buildReportLabels(t, i18n.language));
+  }, [i18nReady, subLoading, isSubscribed, t, i18n.language]);
+
   if (!i18nReady) return null;
 
   return (
     <>
+      <StatusBar style={isDark ? 'light' : 'dark'} />
       <RootNavigator />
       {accepted === false && (
         <DisclaimerModal visible onAccept={accept} />
