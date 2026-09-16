@@ -145,6 +145,13 @@ export default function PaywallScreen() {
             pro="✓"
             colors={colors}
             scale={scale}
+          />
+          <FeatureRow
+            label={`📄 ${t('paywall_feature_export')}`}
+            free="—"
+            pro="✓"
+            colors={colors}
+            scale={scale}
             last
           />
         </View>

@@ -171,6 +171,7 @@
   "paywall_feature_notifs": "Уведомления о приёме",
   "paywall_feature_calendar": "Календарь приёмов",
   "paywall_feature_share": "Поделиться курсом",
+  "paywall_feature_export": "Экспорт в PDF",
   "paywall_price": "$1.99 / месяц",
   "paywall_btn": "Оформить подписку",
   "paywall_restore": "Восстановить покупки",

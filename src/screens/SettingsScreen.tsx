@@ -134,44 +134,8 @@ export default function SettingsScreen() {
       </Text>
 
       <ScrollView contentContainerStyle={s.scroll}>
-        {/* Тема оформления */}
-        <Text style={[s.sectionLabel, { color: colors.textSecondary, fontSize: baseSizes.caption * scale }]}>
-          {t('settings_theme').toUpperCase()}
-        </Text>
-        <View style={s.fontRow}>
-          {THEME_OPTIONS.map(({ key, labelKey, icon }) => {
-            const active = themeMode === key;
-            return (
-              <TouchableOpacity
-                key={key}
-                style={[
-                  s.fontCard,
-                  {
-                    borderColor: active ? colors.accent : colors.border,
-                    backgroundColor: active ? colors.accentLight : colors.cardAlt,
-                    flex: 1,
-                  },
-                ]}
-                onPress={() => setThemeMode(key)}
-              >
-                <Text style={{ fontSize: 22, marginBottom: 6 }}>{icon}</Text>
-                <Text
-                  style={{
-                    fontSize: baseSizes.caption * scale,
-                    color: active ? colors.accentDark : colors.textSecondary,
-                    fontWeight: active ? '600' : '400',
-                    textAlign: 'center',
-                  }}
-                >
-                  {t(labelKey)}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
-
         {/* Подписка */}
-        <Text style={[s.sectionLabel, { color: colors.textSecondary, fontSize: baseSizes.caption * scale, marginTop: 24 }]}>
+        <Text style={[s.sectionLabel, { color: colors.textSecondary, fontSize: baseSizes.caption * scale }]}>
           {t('settings_subscription').toUpperCase()}
         </Text>
         <TouchableOpacity
@@ -214,6 +178,42 @@ export default function SettingsScreen() {
           </View>
           <Text style={{ color: colors.textMuted, fontSize: 18 }}>›</Text>
         </TouchableOpacity>
+
+        {/* Тема оформления */}
+        <Text style={[s.sectionLabel, { color: colors.textSecondary, fontSize: baseSizes.caption * scale, marginTop: 24 }]}>
+          {t('settings_theme').toUpperCase()}
+        </Text>
+        <View style={s.fontRow}>
+          {THEME_OPTIONS.map(({ key, labelKey, icon }) => {
+            const active = themeMode === key;
+            return (
+              <TouchableOpacity
+                key={key}
+                style={[
+                  s.fontCard,
+                  {
+                    borderColor: active ? colors.accent : colors.border,
+                    backgroundColor: active ? colors.accentLight : colors.cardAlt,
+                    flex: 1,
+                  },
+                ]}
+                onPress={() => setThemeMode(key)}
+              >
+                <Text style={{ fontSize: 22, marginBottom: 6 }}>{icon}</Text>
+                <Text
+                  style={{
+                    fontSize: baseSizes.caption * scale,
+                    color: active ? colors.accentDark : colors.textSecondary,
+                    fontWeight: active ? '600' : '400',
+                    textAlign: 'center',
+                  }}
+                >
+                  {t(labelKey)}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
 
         {/* Размер шрифта */}
         <Text style={[s.sectionLabel, { color: colors.textSecondary, fontSize: baseSizes.caption * scale, marginTop: 24 }]}>
