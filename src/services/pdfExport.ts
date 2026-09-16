@@ -108,11 +108,17 @@ export async function getLastExportInfo(): Promise<LastExportInfo | null> {
 
 export async function shareIntakeHistoryPdf(labels: ReportLabels): Promise<void> {
   const uri = await generatePdf(labels);
-  const available = await Sharing.isAvailableAsync();
-  if (available) {
-    await Sharing.shareAsync(uri, { mimeType: 'application/pdf', UTI: 'com.adobe.pdf' });
-  }
+  // Record the export as soon as the PDF exists — what the user does with the
+  // share sheet afterwards (dismiss it, cancel, pick nothing) shouldn't undo it.
   await recordLastExport(`PillyTrack-${new Date().toISOString().slice(0, 10)}.pdf`);
+  try {
+    const available = await Sharing.isAvailableAsync();
+    if (available) {
+      await Sharing.shareAsync(uri, { mimeType: 'application/pdf', UTI: 'com.adobe.pdf' });
+    }
+  } catch {
+    // Share sheet dismissed/cancelled — the PDF itself was still generated fine.
+  }
 }
 
 export async function saveIntakeHistoryPdfToDevice(labels: ReportLabels, filename: string): Promise<string> {
