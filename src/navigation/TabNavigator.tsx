@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, TouchableOpacity, StyleSheet, Text, Platform } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import { Text } from '../components/ui/AppText';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { useNavigation } from '@react-navigation/native';
@@ -12,6 +13,7 @@ import SettingsScreen from '../screens/SettingsScreen';
 import { useTheme } from '../context/ThemeContext';
 import { useFontScale } from '../context/FontScaleContext';
 import { baseSizes } from '../theme/typography';
+import { radii } from '../theme/layout';
 import { useSubscription } from '../context/SubscriptionContext';
 import type { RootStackParamList } from './RootNavigator';
 
@@ -57,7 +59,7 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   return (
     <View style={{ backgroundColor: colors.bg, borderTopWidth: 1, borderTopColor: colors.border }}>
       <TouchableOpacity
-        style={[s.scanBtn, { backgroundColor: colors.accent }]}
+        style={[s.scanBtn, { backgroundColor: colors.accent, shadowColor: colors.textPrimary }]}
         onPress={handleScanPress}
         activeOpacity={0.85}
       >
@@ -117,18 +119,17 @@ export default function TabNavigator() {
 
 const s = StyleSheet.create({
   scanBtn: {
-    marginHorizontal: 16,
-    marginTop: 12,
+    marginHorizontal: 20,
+    marginTop: 14,
     marginBottom: 8,
-    paddingVertical: 14,
-    borderRadius: 14,
+    paddingVertical: 15,
+    borderRadius: radii.md,
     alignItems: 'center',
     justifyContent: 'center',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.12,
-    shadowRadius: 4,
+    elevation: 3,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.14,
+    shadowRadius: 10,
   },
   scanBtnText: { color: '#fff', fontWeight: '700' },
   bar: {

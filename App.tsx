@@ -3,6 +3,14 @@ import { AppState } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import { StatusBar } from 'expo-status-bar';
 import { useTranslation } from 'react-i18next';
+import {
+  useFonts,
+  Nunito_300Light,
+  Nunito_400Regular,
+  Nunito_600SemiBold,
+  Nunito_700Bold,
+  Nunito_800ExtraBold,
+} from '@expo-google-fonts/nunito';
 import { ThemeProvider, useTheme } from './src/context/ThemeContext';
 import { SubscriptionProvider, useSubscription } from './src/context/SubscriptionContext';
 import RootNavigator from './src/navigation/RootNavigator';
@@ -80,6 +88,16 @@ function AppInit() {
 }
 
 export default function App() {
+  const [fontsLoaded] = useFonts({
+    Nunito_300Light,
+    Nunito_400Regular,
+    Nunito_600SemiBold,
+    Nunito_700Bold,
+    Nunito_800ExtraBold,
+  });
+
+  if (!fontsLoaded) return null;
+
   return (
     <ThemeProvider>
       <SubscriptionProvider>

@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import { Text } from '../components/ui/AppText';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useIsFocused } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
@@ -78,7 +79,7 @@ function AllDoneState({ colors, scale, t }: { colors: any; scale: number; t: any
   return (
     <View style={s.center}>
       <View style={[s.iconCircle, { backgroundColor: colors.successLight }]}>
-        <Text style={{ fontSize: 32 }}>✓</Text>
+        <Text style={{ fontSize: 36 }}>🎉</Text>
       </View>
       <Text style={[s.stateTitle, { color: colors.textPrimary, fontSize: baseSizes.title * scale }]}>
         {t('today_done_title')}
@@ -92,16 +93,16 @@ function AllDoneState({ colors, scale, t }: { colors: any; scale: number; t: any
 
 const s = StyleSheet.create({
   root: { flex: 1 },
-  heading: { fontWeight: '700', margin: 20 },
-  list: { paddingHorizontal: 16, paddingBottom: 100 },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32, gap: 12 },
+  heading: { fontWeight: '800', marginHorizontal: 20, marginTop: 20, marginBottom: 16 },
+  list: { paddingHorizontal: 20, paddingBottom: 100 },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 36, gap: 14 },
   iconCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 88,
+    height: 88,
+    borderRadius: 44,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  stateTitle: { fontWeight: '700', textAlign: 'center' },
-  stateBody: { textAlign: 'center', lineHeight: 22 },
+  stateTitle: { fontWeight: '800', textAlign: 'center' },
+  stateBody: { textAlign: 'center', lineHeight: 24 },
 });

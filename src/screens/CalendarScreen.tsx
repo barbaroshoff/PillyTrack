@@ -1,13 +1,6 @@
 import React, { useCallback, useState, useMemo, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  TouchableOpacity,
-  TouchableWithoutFeedback,
-  Dimensions,
-} from 'react-native';
+import { View, StyleSheet, FlatList, TouchableOpacity, TouchableWithoutFeedback, Dimensions } from 'react-native';
+import { Text } from '../components/ui/AppText';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CalendarList } from 'react-native-calendars';
 import type { DateData } from 'react-native-calendars';
@@ -16,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 import { useFontScale } from '../context/FontScaleContext';
 import { baseSizes } from '../theme/typography';
+import { radii } from '../theme/layout';
 import { getAllIntakes } from '../db/intakes';
 import type { IntakeEvent } from '../db/intakes';
 
@@ -241,7 +235,7 @@ export default function CalendarScreen() {
         <View
           style={[
             s.dayPanel,
-            { backgroundColor: colors.bg, borderColor: colors.border, shadowColor: colors.textPrimary },
+            { backgroundColor: colors.cardBg, shadowColor: colors.textPrimary },
           ]}
         >
           <View style={s.dayPanelHeader}>
@@ -306,7 +300,7 @@ function SheetEventRow({ event, colors, scale, t }: {
     colors.warningLight;
 
   return (
-    <View style={[s.sheetRow, { borderColor: colors.border }]}>
+    <View style={[s.sheetRow, { backgroundColor: colors.cardAlt }]}>
       <View style={[s.sheetIconWrap, { backgroundColor: colors.accentLight }]}>
         <Text style={{ fontSize: 16 }}>💊</Text>
       </View>
@@ -348,40 +342,38 @@ const s = StyleSheet.create({
   legendDot: { width: 12, height: 12, borderRadius: 6 },
   dayPanel: {
     position: 'absolute',
-    left: 12,
-    right: 12,
+    left: 14,
+    right: 14,
     bottom: 20,
     maxHeight: '55%',
-    borderWidth: 1,
-    borderRadius: 20,
-    padding: 20,
-    paddingTop: 16,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 16,
+    borderRadius: radii.xl,
+    padding: 22,
+    paddingTop: 18,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.14,
+    shadowRadius: 20,
     elevation: 8,
   },
   dayPanelHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 12,
+    marginBottom: 14,
   },
-  dayPanelDate: { fontWeight: '700' },
+  dayPanelDate: { fontWeight: '800' },
   sheetRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    padding: 12,
-    borderWidth: 1,
-    borderRadius: 12,
+    gap: 12,
+    padding: 14,
+    borderRadius: radii.sm,
   },
   sheetIconWrap: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
+    width: 40,
+    height: 40,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  statusBadge: { paddingHorizontal: 12, paddingVertical: 4, borderRadius: 20 },
+  statusBadge: { paddingHorizontal: 12, paddingVertical: 5, borderRadius: 20 },
 });

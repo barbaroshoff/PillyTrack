@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { Text } from '../../components/ui/AppText';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -7,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import { useFontScale } from '../../context/FontScaleContext';
 import { baseSizes } from '../../theme/typography';
+import { radii } from '../../theme/layout';
 import { useScanFlowStore } from '../../store/scanFlowStore';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
 
@@ -26,7 +28,7 @@ export default function ScanSuccessScreen() {
     <SafeAreaView style={[s.root, { backgroundColor: colors.bg }]}>
       <View style={s.center}>
         <View style={[s.circle, { backgroundColor: colors.successLight }]}>
-          <Text style={s.emoji}>✓</Text>
+          <Text style={s.emoji}>🎉</Text>
         </View>
 
         <Text style={[s.title, { color: colors.textPrimary, fontSize: baseSizes.title * scale * 1.15 }]}>
@@ -72,8 +74,8 @@ const s = StyleSheet.create({
   btn: {
     marginTop: 24,
     paddingHorizontal: 48,
-    paddingVertical: 16,
-    borderRadius: 14,
+    paddingVertical: 17,
+    borderRadius: radii.md,
   },
   btnText: { color: '#fff', fontWeight: '600' },
 });

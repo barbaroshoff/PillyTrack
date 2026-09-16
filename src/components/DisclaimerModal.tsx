@@ -1,18 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Modal,
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-} from 'react-native';
+import { Modal, View, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { Text } from './ui/AppText';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 import { useFontScale } from '../context/FontScaleContext';
 import { baseSizes } from '../theme/typography';
+import { radii } from '../theme/layout';
 
 const DISCLAIMER_KEY = '@pilly_disclaimer_accepted';
 
@@ -111,17 +106,17 @@ const s = StyleSheet.create({
   textBoxInner: { gap: 12 },
   disclaimerText: { lineHeight: 22, textAlign: 'center' },
   warningBox: {
-    borderRadius: 14,
+    borderRadius: radii.md,
     borderWidth: 1.5,
-    padding: 16,
+    padding: 18,
     gap: 6,
   },
   warningTitle: { fontWeight: '700', marginBottom: 4 },
   warningText: { lineHeight: 22 },
   acceptBtn: {
     width: '100%',
-    padding: 16,
-    borderRadius: 14,
+    padding: 17,
+    borderRadius: radii.md,
     alignItems: 'center',
     marginTop: 8,
   },

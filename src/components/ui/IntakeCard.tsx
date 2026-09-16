@@ -1,9 +1,11 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { Text } from './AppText';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import { useFontScale } from '../../context/FontScaleContext';
 import { baseSizes } from '../../theme/typography';
+import { radii, cardShadow, timeOfDay } from '../../theme/layout';
 import type { IntakeEvent } from '../../db/intakes';
 
 interface Props {
@@ -13,76 +15,46 @@ interface Props {
   onDelete: () => void;
 }
 
-const STATUS_COLORS = {
-  pending: { bg: 'warningLight', border: 'warning', labelColor: 'warning' },
-  taken: { bg: 'successLight', border: 'success', labelColor: 'success' },
-  missed: { bg: 'dangerLight', border: 'danger', labelColor: 'danger' },
-} as const;
+const TIME_ICON = { morning: '🌅', midday: '☀️', evening: '🌙' } as const;
 
 export default function IntakeCard({ intake, onTaken, onSkipped, onDelete }: Props) {
   const { colors } = useTheme();
   const { scale } = useFontScale();
   const { t } = useTranslation();
-  const cfg = STATUS_COLORS[intake.status];
+  const bucket = timeOfDay(intake.scheduled_at);
+  const bucketColorLight = colors[`${bucket}Light` as const];
 
   const time = new Date(intake.scheduled_at).toLocaleTimeString([], {
     hour: '2-digit',
     minute: '2-digit',
   });
 
-  const statusLabel =
-    intake.status === 'taken'
-      ? t('status_taken')
-      : intake.status === 'missed'
-      ? t('status_missed')
-      : t('status_pending');
-
-  const cardBg = colors[cfg.bg as keyof typeof colors] as string;
-  const borderColor = intake.status === 'missed'
-    ? (colors[cfg.border as keyof typeof colors] as string)
-    : colors.border;
-
   return (
-    <View
-      style={[
-        s.card,
-        {
-          backgroundColor: cardBg,
-          borderColor,
-          borderWidth: intake.status === 'missed' ? 1.5 : 1,
-        },
-      ]}
-    >
+    <View style={[s.card, { backgroundColor: colors.cardBg, shadowColor: colors.textPrimary }]}>
       <View style={s.row}>
-        <View style={[s.pill, { backgroundColor: colors.accentLight }]}>
-          <Text style={{ fontSize: 20 }}>💊</Text>
+        <View style={[s.pill, { backgroundColor: bucketColorLight }]}>
+          <Text style={{ fontSize: 22 }}>{TIME_ICON[bucket]}</Text>
         </View>
 
         <View style={s.info}>
           <Text style={[s.name, { color: colors.textPrimary, fontSize: baseSizes.body * scale }]}>
             {intake.medication_name ?? intake.course_id}
           </Text>
-          <Text style={{ color: colors.textSecondary, fontSize: baseSizes.caption * scale }}>
+          <Text style={{ color: colors.textSecondary, fontSize: baseSizes.caption * scale, marginTop: 2 }}>
             {time}
           </Text>
         </View>
 
-        <View
-          style={[
-            s.badge,
-            { backgroundColor: colors[cfg.bg as keyof typeof colors] as string },
-          ]}
-        >
-          <Text
-            style={{
-              color: colors[cfg.labelColor as keyof typeof colors] as string,
-              fontSize: baseSizes.caption * scale,
-              fontWeight: '600',
-            }}
-          >
-            {statusLabel}
-          </Text>
-        </View>
+        {intake.status === 'taken' && (
+          <View style={[s.statusCircle, { backgroundColor: colors.success }]}>
+            <Text style={{ fontSize: 16, color: '#fff', fontWeight: '700' }}>✓</Text>
+          </View>
+        )}
+        {intake.status === 'missed' && (
+          <View style={[s.statusCircle, { backgroundColor: colors.dangerLight }]}>
+            <Text style={{ fontSize: 15, color: colors.danger, fontWeight: '700' }}>✕</Text>
+          </View>
+        )}
 
         <TouchableOpacity
           style={s.deleteBtn}
@@ -92,6 +64,7 @@ export default function IntakeCard({ intake, onTaken, onSkipped, onDelete }: Pro
               { text: t('delete'), style: 'destructive', onPress: onDelete },
             ])
           }
+          hitSlop={6}
         >
           <Text style={{ color: colors.textMuted, fontSize: 18 }}>✕</Text>
         </TouchableOpacity>
@@ -102,18 +75,26 @@ export default function IntakeCard({ intake, onTaken, onSkipped, onDelete }: Pro
           <TouchableOpacity
             style={[s.actionBtn, { backgroundColor: colors.success }]}
             onPress={onTaken}
+            activeOpacity={0.85}
           >
-            <Text style={[s.actionText, { fontSize: baseSizes.button * scale }]}>{t('taken')}</Text>
+            <Text style={[s.actionText, { fontSize: baseSizes.button * scale }]}>✓ {t('taken')}</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[s.actionBtn, { backgroundColor: colors.dangerLight, borderWidth: 1, borderColor: colors.danger }]}
+            style={[s.actionBtn, { backgroundColor: colors.cardAlt }]}
             onPress={onSkipped}
+            activeOpacity={0.85}
           >
-            <Text style={[s.actionText, { color: colors.danger, fontSize: baseSizes.button * scale }]}>
+            <Text style={{ color: colors.textSecondary, fontWeight: '600', fontSize: baseSizes.button * scale }}>
               {t('skipped')}
             </Text>
           </TouchableOpacity>
         </View>
+      )}
+
+      {intake.status === 'missed' && (
+        <Text style={{ color: colors.danger, fontSize: baseSizes.caption * scale, marginTop: 10 }}>
+          {t('status_missed')}
+        </Text>
       )}
     </View>
   );
@@ -121,32 +102,35 @@ export default function IntakeCard({ intake, onTaken, onSkipped, onDelete }: Pro
 
 const s = StyleSheet.create({
   card: {
-    borderRadius: 16,
-    padding: 14,
-    marginBottom: 12,
+    borderRadius: radii.lg,
+    padding: 18,
+    marginBottom: 14,
+    ...cardShadow,
   },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 14 },
   pill: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
+    width: 52,
+    height: 52,
+    borderRadius: radii.sm,
     alignItems: 'center',
     justifyContent: 'center',
   },
   info: { flex: 1 },
-  name: { fontWeight: '600', marginBottom: 2 },
-  badge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 20,
+  name: { fontWeight: '700' },
+  statusCircle: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  deleteBtn: { padding: 6, marginLeft: 4 },
-  actions: { flexDirection: 'row', gap: 10, marginTop: 12 },
+  deleteBtn: { padding: 6, marginLeft: 6 },
+  actions: { flexDirection: 'row', gap: 10, marginTop: 16 },
   actionBtn: {
     flex: 1,
-    paddingVertical: 10,
-    borderRadius: 10,
+    paddingVertical: 12,
+    borderRadius: radii.sm,
     alignItems: 'center',
   },
-  actionText: { color: '#fff', fontWeight: '600' },
+  actionText: { color: '#fff', fontWeight: '700' },
 });

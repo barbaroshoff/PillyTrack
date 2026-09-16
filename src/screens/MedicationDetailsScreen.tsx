@@ -1,13 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Image,
-  Alert,
-} from 'react-native';
+import { View, StyleSheet, ScrollView, TouchableOpacity, Image, Alert } from 'react-native';
+import { Text } from '../components/ui/AppText';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp, NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -15,6 +8,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { useTheme } from '../context/ThemeContext';
 import { useFontScale } from '../context/FontScaleContext';
 import { baseSizes } from '../theme/typography';
+import { radii, cardShadow } from '../theme/layout';
 import { useTranslation } from 'react-i18next';
 import { getMedicationById, deleteMedication, updateMedicationPhoto } from '../db/medications';
 import { getCourseByMedicationId } from '../db/courses';
@@ -145,7 +139,7 @@ export default function MedicationDetailsScreen() {
 
         {/* Прогресс-бар */}
         {stats && course && (
-          <View style={[s.card, { backgroundColor: colors.cardAlt, borderColor: colors.border }]}>
+          <View style={[s.card, { backgroundColor: colors.cardBg, shadowColor: colors.textPrimary }]}>
             <Text style={[s.cardLabel, { color: colors.textSecondary, fontSize: baseSizes.caption * scale }]}>
               {t('details_progress_label')}
             </Text>
@@ -177,7 +171,7 @@ export default function MedicationDetailsScreen() {
             <Text style={[s.actionBtnText, { fontSize: baseSizes.button * scale }]}>{t('details_renew')}</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[s.actionBtn, { backgroundColor: colors.cardAlt, borderWidth: 1, borderColor: colors.border }]}
+            style={[s.actionBtn, { backgroundColor: colors.cardAlt }]}
             onPress={() => {
               resetScan();
               setScanField('medicationName', medication.name);
@@ -192,7 +186,7 @@ export default function MedicationDetailsScreen() {
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[s.actionBtn, { backgroundColor: colors.dangerLight, borderWidth: 1, borderColor: colors.danger }]}
+            style={[s.actionBtn, { backgroundColor: colors.dangerLight }]}
             onPress={() =>
               Alert.alert(
                 t('details_delete_title'),
@@ -221,7 +215,7 @@ export default function MedicationDetailsScreen() {
 
         {/* История */}
         {history.length > 0 && (
-          <View style={[s.card, { backgroundColor: colors.cardAlt, borderColor: colors.border }]}>
+          <View style={[s.card, { backgroundColor: colors.cardBg, shadowColor: colors.textPrimary }]}>
             <Text style={[s.cardLabel, { color: colors.textSecondary, fontSize: baseSizes.caption * scale }]}>
               {t('details_history_label')}
             </Text>
@@ -265,18 +259,18 @@ const s = StyleSheet.create({
   root: { flex: 1 },
   header: { padding: 16 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  scroll: { padding: 16, gap: 12 },
+  scroll: { padding: 20, gap: 14 },
   banner: {
-    borderRadius: 20,
-    padding: 24,
+    borderRadius: radii.xl,
+    padding: 26,
     alignItems: 'center',
     gap: 10,
     marginBottom: 4,
   },
   iconCircle: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
+    width: 76,
+    height: 76,
+    borderRadius: 38,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 4,
@@ -293,9 +287,9 @@ const s = StyleSheet.create({
     justifyContent: 'center',
   },
   medName: { fontWeight: '800', textAlign: 'center' },
-  card: { borderRadius: 16, borderWidth: 1, padding: 14, gap: 8 },
-  cardLabel: { fontWeight: '600', letterSpacing: 0.5 },
-  progressText: { fontWeight: '600' },
+  card: { borderRadius: radii.lg, padding: 18, gap: 10, ...cardShadow },
+  cardLabel: { fontWeight: '700', letterSpacing: 0.5 },
+  progressText: { fontWeight: '700' },
   barBg: { height: 8, borderRadius: 4, overflow: 'hidden' },
   barFill: { height: '100%', borderRadius: 4 },
   historyRow: {
@@ -306,11 +300,11 @@ const s = StyleSheet.create({
     borderBottomWidth: 1,
   },
   historyInfo: { flex: 1 },
-  actions: { gap: 10, marginTop: 8 },
+  actions: { gap: 12, marginTop: 8 },
   actionBtn: {
-    padding: 16,
-    borderRadius: 14,
+    padding: 17,
+    borderRadius: radii.md,
     alignItems: 'center',
   },
-  actionBtnText: { color: '#fff', fontWeight: '600' },
+  actionBtnText: { color: '#fff', fontWeight: '700' },
 });

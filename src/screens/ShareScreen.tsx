@@ -1,20 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-  ActivityIndicator,
-  Alert,
-  Share as RNShare,
-} from 'react-native';
+import { View, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, Alert, Share as RNShare } from 'react-native';
+import { Text } from '../components/ui/AppText';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 import { useFontScale } from '../context/FontScaleContext';
 import { baseSizes } from '../theme/typography';
+import { radii, cardShadow } from '../theme/layout';
 import { useSubscription } from '../context/SubscriptionContext';
 import { getCurrentShareIdentity, syncShare, regenerateCode } from '../services/shareSync';
 import type { ShareIdentity } from '../services/shareIdentity';
@@ -116,10 +109,7 @@ export default function ShareScreen() {
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[
-            s.btn,
-            { backgroundColor: colors.cardAlt, borderWidth: 1, borderColor: colors.border },
-          ]}
+          style={[s.btn, { backgroundColor: colors.cardBg, shadowColor: colors.textPrimary }, cardShadow]}
           onPress={handleSync}
           disabled={syncing}
         >
@@ -165,16 +155,16 @@ const s = StyleSheet.create({
     padding: 16,
   },
   title: { fontWeight: '700' },
-  scroll: { padding: 20, gap: 14 },
+  scroll: { padding: 20, gap: 16 },
   codeCard: {
-    borderRadius: 20,
+    borderRadius: radii.xl,
     borderWidth: 1.5,
-    padding: 24,
+    padding: 26,
     alignItems: 'center',
     gap: 8,
   },
   code: { fontWeight: '800', letterSpacing: 2 },
-  btn: { padding: 16, borderRadius: 14, alignItems: 'center' },
+  btn: { padding: 17, borderRadius: radii.md, alignItems: 'center' },
   btnText: { color: '#fff', fontWeight: '700' },
   regenBtn: { alignItems: 'center', paddingVertical: 8, marginTop: 8 },
 });

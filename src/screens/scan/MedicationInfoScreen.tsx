@@ -1,14 +1,6 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  TextInput,
-  Image,
-  Alert,
-} from 'react-native';
+import { View, StyleSheet, ScrollView, TouchableOpacity, TextInput, Image, Alert } from 'react-native';
+import { Text } from '../../components/ui/AppText';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp, NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -16,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import { useFontScale } from '../../context/FontScaleContext';
 import { baseSizes } from '../../theme/typography';
+import { radii, cardShadow } from '../../theme/layout';
 import { useScanFlowStore } from '../../store/scanFlowStore';
 import type { ScanFlowParamList } from '../../navigation/ScanFlowNavigator';
 
@@ -95,7 +88,7 @@ export default function MedicationInfoScreen() {
         <InfoCard title={t('med_info_contraindications')} text={info.contraindications} colors={colors} scale={scale} />
         <InfoCard title={t('med_info_side_effects')} text={info.sideEffects} colors={colors} scale={scale} />
 
-        <View style={[s.pillsCard, { backgroundColor: colors.cardAlt, borderColor: colors.border }]}>
+        <View style={[s.pillsCard, { backgroundColor: colors.cardBg, shadowColor: colors.textPrimary }]}>
           <Text style={[s.cardLabel, { color: colors.textSecondary, fontSize: baseSizes.caption * scale }]}>
             {t('confirm_pills_label')}
           </Text>
@@ -148,7 +141,7 @@ function InfoCard({
   scale: number;
 }) {
   return (
-    <View style={[s.infoCard, { backgroundColor: colors.cardAlt, borderColor: colors.border }]}>
+    <View style={[s.infoCard, { backgroundColor: colors.cardBg, shadowColor: colors.textPrimary }]}>
       <Text style={[s.cardLabel, { color: colors.textSecondary, fontSize: baseSizes.caption * scale }]}>
         {title}
       </Text>
@@ -186,8 +179,8 @@ const s = StyleSheet.create({
     paddingHorizontal: 8,
     width: '100%',
   },
-  infoCard: { borderRadius: 14, borderWidth: 1, padding: 14, gap: 6 },
-  pillsCard: { borderRadius: 14, borderWidth: 1, padding: 14, gap: 10 },
+  infoCard: { borderRadius: radii.md, padding: 16, gap: 6, ...cardShadow },
+  pillsCard: { borderRadius: radii.md, padding: 16, gap: 10, ...cardShadow },
   cardLabel: { fontWeight: '600', letterSpacing: 0.5 },
   stepper: {
     flexDirection: 'row',
@@ -204,7 +197,7 @@ const s = StyleSheet.create({
   },
   stepIcon: { fontSize: 28, lineHeight: 32, fontWeight: '300' },
   stepValue: { width: 80, fontWeight: '700', textAlign: 'center' },
-  disclaimer: { borderRadius: 12, borderWidth: 1, padding: 12 },
-  nextBtn: { marginTop: 8, padding: 16, borderRadius: 14, alignItems: 'center' },
+  disclaimer: { borderRadius: radii.sm, borderWidth: 1, padding: 14 },
+  nextBtn: { marginTop: 8, padding: 17, borderRadius: radii.md, alignItems: 'center' },
   nextText: { color: '#fff', fontWeight: '600' },
 });

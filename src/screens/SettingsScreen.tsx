@@ -1,15 +1,6 @@
 import React, { useCallback, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-  Linking,
-  Switch,
-  ActivityIndicator,
-  Alert,
-} from 'react-native';
+import { View, StyleSheet, TouchableOpacity, ScrollView, Linking, Switch, ActivityIndicator, Alert } from 'react-native';
+import { Text } from '../components/ui/AppText';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -18,6 +9,7 @@ import { useTheme } from '../context/ThemeContext';
 import type { ThemeMode } from '../context/ThemeContext';
 import { useFontScale } from '../context/FontScaleContext';
 import { baseSizes, fontScales } from '../theme/typography';
+import { radii, cardShadow } from '../theme/layout';
 import { setLanguage, getLanguage } from '../i18n';
 import { useSubscription } from '../context/SubscriptionContext';
 import { getAutoExportEnabled, setAutoExportEnabled } from '../services/autoExport';
@@ -142,8 +134,8 @@ export default function SettingsScreen() {
           style={[
             s.subCard,
             {
-              backgroundColor: isSubscribed ? colors.accentLight : colors.cardAlt,
-              borderColor: isSubscribed ? colors.accent : colors.border,
+              backgroundColor: isSubscribed ? colors.accentLight : colors.cardBg,
+              shadowColor: colors.textPrimary,
             },
           ]}
           onPress={() => navigation.navigate('Paywall')}
@@ -192,7 +184,7 @@ export default function SettingsScreen() {
                 style={[
                   s.fontCard,
                   {
-                    borderColor: active ? colors.accent : colors.border,
+                    borderColor: active ? colors.accent : 'transparent',
                     backgroundColor: active ? colors.accentLight : colors.cardAlt,
                     flex: 1,
                   },
@@ -228,7 +220,7 @@ export default function SettingsScreen() {
                 style={[
                   s.fontCard,
                   {
-                    borderColor: active ? colors.accent : colors.border,
+                    borderColor: active ? colors.accent : 'transparent',
                     backgroundColor: active ? colors.accentLight : colors.cardAlt,
                     flex: 1,
                   },
@@ -265,7 +257,7 @@ export default function SettingsScreen() {
           {t('settings_language').toUpperCase()}
         </Text>
         <TouchableOpacity
-          style={[s.settingsRow, { backgroundColor: colors.cardAlt, borderColor: colors.border }]}
+          style={[s.settingsRow, { backgroundColor: colors.cardBg, shadowColor: colors.textPrimary }]}
           onPress={() => setLangExpanded((v) => !v)}
         >
           <Text style={{ color: colors.textPrimary, fontSize: baseSizes.body * scale }}>
@@ -290,7 +282,7 @@ export default function SettingsScreen() {
                     s.langBtn,
                     {
                       backgroundColor: active ? colors.accent : colors.cardAlt,
-                      borderColor: active ? colors.accent : colors.border,
+                      borderColor: active ? colors.accent : 'transparent',
                     },
                   ]}
                   onPress={() => changeLang(code)}
@@ -347,7 +339,7 @@ export default function SettingsScreen() {
           {t('settings_export').toUpperCase()}
         </Text>
         <TouchableOpacity
-          style={[s.settingsRow, { backgroundColor: colors.cardAlt, borderColor: colors.border }]}
+          style={[s.settingsRow, { backgroundColor: colors.cardBg, shadowColor: colors.textPrimary }]}
           onPress={handleExportPdf}
           disabled={exporting}
         >
@@ -366,7 +358,7 @@ export default function SettingsScreen() {
         <View
           style={[
             s.settingsRow,
-            { backgroundColor: colors.cardAlt, borderColor: colors.border, alignItems: 'flex-start' },
+            { backgroundColor: colors.cardBg, shadowColor: colors.textPrimary, alignItems: 'flex-start' },
           ]}
         >
           <View style={{ flex: 1, marginRight: 12 }}>
@@ -405,7 +397,7 @@ export default function SettingsScreen() {
         <Text style={[s.sectionLabel, { color: colors.textSecondary, fontSize: baseSizes.caption * scale, marginTop: 24 }]}>
           {t('settings_about').toUpperCase()}
         </Text>
-        <View style={[s.card, { backgroundColor: colors.cardAlt, borderColor: colors.border }]}>
+        <View style={[s.card, { backgroundColor: colors.cardBg, shadowColor: colors.textPrimary }]}>
           <Text style={{ color: colors.textSecondary, fontSize: baseSizes.body * scale, lineHeight: 22 }}>
             {t('settings_about_storage')}
           </Text>
@@ -425,8 +417,9 @@ export default function SettingsScreen() {
 function SettingsRow({ label, colors, scale, onPress }: { label: string; colors: any; scale: number; onPress: () => void }) {
   return (
     <TouchableOpacity
-      style={[s.settingsRow, { backgroundColor: colors.cardAlt, borderColor: colors.border }]}
+      style={[s.settingsRow, { backgroundColor: colors.cardBg, shadowColor: colors.textPrimary }]}
       onPress={onPress}
+      activeOpacity={0.75}
     >
       <Text style={{ color: colors.textPrimary, fontSize: baseSizes.body * scale }}>{label}</Text>
       <Text style={{ color: colors.textMuted, fontSize: 18 }}>›</Text>
@@ -436,21 +429,21 @@ function SettingsRow({ label, colors, scale, onPress }: { label: string; colors:
 
 const s = StyleSheet.create({
   root: { flex: 1 },
-  heading: { fontWeight: '700', margin: 20 },
-  scroll: { paddingHorizontal: 16, paddingBottom: 40 },
-  sectionLabel: { fontWeight: '600', letterSpacing: 0.5, marginBottom: 10 },
+  heading: { fontWeight: '800', margin: 20 },
+  scroll: { paddingHorizontal: 20, paddingBottom: 40 },
+  sectionLabel: { fontWeight: '700', letterSpacing: 0.5, marginBottom: 12 },
   subCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 16,
-    borderWidth: 1.5,
-    padding: 16,
-    marginBottom: 8,
+    borderRadius: radii.lg,
+    padding: 18,
+    marginBottom: 10,
+    ...cardShadow,
   },
   fontRow: { flexDirection: 'row', gap: 10 },
   fontCard: {
-    borderRadius: 16,
-    borderWidth: 1.5,
+    borderRadius: radii.md,
+    borderWidth: 2,
     padding: 14,
     alignItems: 'center',
     justifyContent: 'center',
@@ -458,18 +451,18 @@ const s = StyleSheet.create({
   },
   langGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   langBtn: {
-    borderRadius: 12,
-    borderWidth: 1.5,
+    borderRadius: radii.sm,
+    borderWidth: 2,
     paddingVertical: 12,
     paddingHorizontal: 8,
     alignItems: 'center',
     width: '22%',
   },
   card: {
-    borderRadius: 16,
-    borderWidth: 1,
-    padding: 16,
-    gap: 12,
+    borderRadius: radii.lg,
+    padding: 18,
+    gap: 14,
+    ...cardShadow,
   },
   divider: { height: 1 },
   row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
@@ -477,8 +470,8 @@ const s = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 16,
-    borderRadius: 14,
-    borderWidth: 1,
+    padding: 18,
+    borderRadius: radii.md,
+    ...cardShadow,
   },
 });

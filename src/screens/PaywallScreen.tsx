@@ -1,19 +1,13 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-  ActivityIndicator,
-  Alert,
-} from 'react-native';
+import { View, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, Alert } from 'react-native';
+import { Text } from '../components/ui/AppText';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 import { useFontScale } from '../context/FontScaleContext';
 import { baseSizes } from '../theme/typography';
+import { radii, cardShadow } from '../theme/layout';
 import {
   useSubscription,
   getPlanPricing,
@@ -94,7 +88,8 @@ export default function PaywallScreen() {
         </View>
 
         {/* Таблица сравнения */}
-        <View style={[s.table, { backgroundColor: colors.cardAlt, borderColor: colors.border }]}>
+        <View style={[s.tableShadowWrap, { shadowColor: colors.textPrimary }]}>
+        <View style={[s.table, { backgroundColor: colors.cardBg }]}>
           {/* Заголовок таблицы */}
           <View style={[s.tableHeader, { borderBottomColor: colors.border }]}>
             <View style={s.tableFeatureCol} />
@@ -155,6 +150,7 @@ export default function PaywallScreen() {
             last
           />
         </View>
+        </View>
 
         {/* Выбор тарифа */}
         <View style={s.plans}>
@@ -168,9 +164,9 @@ export default function PaywallScreen() {
                 style={[
                   s.planCard,
                   {
-                    backgroundColor: active ? colors.accentLight : colors.cardAlt,
-                    borderColor: active ? colors.accent : colors.border,
-                    borderWidth: active ? 2 : 1,
+                    backgroundColor: active ? colors.accentLight : colors.cardBg,
+                    borderColor: active ? colors.accent : 'transparent',
+                    shadowColor: colors.textPrimary,
                   },
                 ]}
                 onPress={() => setSelectedPlan(plan)}
@@ -278,12 +274,13 @@ const s = StyleSheet.create({
   root: { flex: 1 },
   closeBtn: { position: 'absolute', top: 52, right: 20, zIndex: 10, padding: 8 },
   scroll: { padding: 20, paddingTop: 16, gap: 16, paddingBottom: 40 },
-  hero: { alignItems: 'center', gap: 10, marginTop: 24, marginBottom: 8 },
-  iconCircle: { width: 80, height: 80, borderRadius: 40, alignItems: 'center', justifyContent: 'center' },
-  iconEmoji: { fontSize: 40 },
+  hero: { alignItems: 'center', gap: 12, marginTop: 24, marginBottom: 8 },
+  iconCircle: { width: 88, height: 88, borderRadius: 44, alignItems: 'center', justifyContent: 'center' },
+  iconEmoji: { fontSize: 42 },
   title: { fontWeight: '800', textAlign: 'center' },
-  subtitle: { textAlign: 'center', lineHeight: 22 },
-  table: { borderRadius: 16, borderWidth: 1, overflow: 'hidden' },
+  subtitle: { textAlign: 'center', lineHeight: 24 },
+  tableShadowWrap: { borderRadius: radii.lg, ...cardShadow },
+  table: { borderRadius: radii.lg, overflow: 'hidden' },
   tableHeader: { flexDirection: 'row', borderBottomWidth: 1 },
   tableFeatureCol: { flex: 2, padding: 12 },
   tableCol: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 10 },
@@ -291,11 +288,13 @@ const s = StyleSheet.create({
   tableRow: { flexDirection: 'row', alignItems: 'center' },
   tableFeatureLabel: { flex: 2, paddingHorizontal: 12, paddingVertical: 12 },
   cellText: { textAlign: 'center' },
-  plans: { gap: 10 },
+  plans: { gap: 12 },
   planCard: {
-    borderRadius: 16,
-    padding: 14,
-    paddingTop: 18,
+    borderRadius: radii.md,
+    borderWidth: 2,
+    padding: 16,
+    paddingTop: 20,
+    ...cardShadow,
   },
   bestBadge: {
     position: 'absolute',
@@ -319,7 +318,7 @@ const s = StyleSheet.create({
   planLabel: { fontWeight: '700' },
   planPrice: { fontWeight: '800' },
   saveBadge: { marginTop: 4, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8 },
-  btn: { padding: 16, borderRadius: 14, alignItems: 'center' },
+  btn: { padding: 17, borderRadius: radii.md, alignItems: 'center' },
   btnText: { color: '#fff', fontWeight: '700' },
   restoreBtn: { alignItems: 'center', paddingVertical: 8 },
   restoreText: { textDecorationLine: 'underline' },

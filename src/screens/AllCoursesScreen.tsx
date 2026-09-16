@@ -1,13 +1,6 @@
 import React, { useCallback, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  TouchableOpacity,
-  RefreshControl,
-  Image,
-} from 'react-native';
+import { View, StyleSheet, FlatList, TouchableOpacity, RefreshControl, Image } from 'react-native';
+import { Text } from '../components/ui/AppText';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -15,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 import { useFontScale } from '../context/FontScaleContext';
 import { baseSizes } from '../theme/typography';
+import { radii, cardShadow } from '../theme/layout';
 import { getActiveCoursesWithMedications } from '../db/courses';
 import type { CourseWithMedication } from '../db/courses';
 import type { RootStackParamList } from '../navigation/RootNavigator';
@@ -107,7 +101,7 @@ function CourseCard({ course, onPress }: CardProps) {
 
   return (
     <TouchableOpacity
-      style={[s.card, { backgroundColor: colors.cardAlt, borderColor: colors.border }]}
+      style={[s.card, { backgroundColor: colors.cardBg, shadowColor: colors.textPrimary }]}
       onPress={onPress}
       activeOpacity={0.75}
     >
@@ -153,24 +147,24 @@ function CourseCard({ course, onPress }: CardProps) {
 
 const s = StyleSheet.create({
   root: { flex: 1 },
-  heading: { fontWeight: '700', margin: 20 },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32, gap: 12 },
-  iconCircle: { width: 80, height: 80, borderRadius: 40, alignItems: 'center', justifyContent: 'center' },
-  emptyTitle: { fontWeight: '700', textAlign: 'center' },
-  emptyBody: { textAlign: 'center', lineHeight: 22 },
-  addBtn: { marginTop: 8, paddingHorizontal: 28, paddingVertical: 13, borderRadius: 14 },
-  addBtnText: { color: '#fff', fontWeight: '600' },
-  list: { paddingHorizontal: 16, paddingBottom: 24, gap: 12 },
-  card: { borderRadius: 16, borderWidth: 1, overflow: 'hidden' },
-  cardRow: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14 },
-  icon: { width: 48, height: 48, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  heading: { fontWeight: '800', margin: 20 },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 36, gap: 14 },
+  iconCircle: { width: 88, height: 88, borderRadius: 44, alignItems: 'center', justifyContent: 'center' },
+  emptyTitle: { fontWeight: '800', textAlign: 'center' },
+  emptyBody: { textAlign: 'center', lineHeight: 24 },
+  addBtn: { marginTop: 8, paddingHorizontal: 28, paddingVertical: 14, borderRadius: radii.sm },
+  addBtnText: { color: '#fff', fontWeight: '700' },
+  list: { paddingHorizontal: 20, paddingBottom: 24, gap: 14 },
+  card: { borderRadius: radii.lg, ...cardShadow },
+  cardRow: { flexDirection: 'row', alignItems: 'center', gap: 14, padding: 16 },
+  icon: { width: 52, height: 52, borderRadius: radii.sm, alignItems: 'center', justifyContent: 'center' },
   cardInfo: { flex: 1 },
-  medName: { fontWeight: '600', marginBottom: 2 },
+  medName: { fontWeight: '700', marginBottom: 2 },
   nextRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: 14,
-    paddingVertical: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     borderTopWidth: 1,
   },
 });

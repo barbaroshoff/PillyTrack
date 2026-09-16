@@ -1,12 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-  Alert,
-} from 'react-native';
+import { View, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { Text } from '../components/ui/AppText';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp, NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -15,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 import { useFontScale } from '../context/FontScaleContext';
 import { baseSizes } from '../theme/typography';
+import { radii } from '../theme/layout';
 import { getMedicationById } from '../db/medications';
 import { getCourseByMedicationId, insertCourse, updateCourseStatus } from '../db/courses';
 import { insertIntakeEvents, deletePendingIntakesByCourse } from '../db/intakes';
@@ -137,7 +132,7 @@ export default function RenewCourseScreen() {
 
       <ScrollView contentContainerStyle={s.scroll} keyboardShouldPersistTaps="handled">
         {/* Карточка препарата (readonly) */}
-        <View style={[s.card, { backgroundColor: colors.accentLight, borderColor: colors.border }]}>
+        <View style={[s.card, { backgroundColor: colors.accentLight }]}>
           <View style={s.cardRow}>
             <View style={[s.icon, { backgroundColor: colors.accent }]}>
               <Text style={{ fontSize: 22 }}>💊</Text>
@@ -208,17 +203,17 @@ const s = StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16 },
   title: { fontWeight: '700' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  scroll: { padding: 16, gap: 16 },
-  card: { borderRadius: 16, borderWidth: 1, padding: 16 },
-  cardRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  icon: { width: 48, height: 48, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  scroll: { padding: 20, gap: 18 },
+  card: { borderRadius: radii.lg, padding: 18 },
+  cardRow: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+  icon: { width: 52, height: 52, borderRadius: radii.sm, alignItems: 'center', justifyContent: 'center' },
   cardInfo: { flex: 1 },
   medName: { fontWeight: '700', marginBottom: 2 },
-  label: { fontWeight: '600', letterSpacing: 0.5 },
+  label: { fontWeight: '700', letterSpacing: 0.5 },
   stepper: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 24 },
   stepBtn: { width: 64, height: 64, borderRadius: 32, alignItems: 'center', justifyContent: 'center' },
   stepIcon: { fontSize: 32, lineHeight: 36, fontWeight: '300' },
   stepValue: { width: 80, fontWeight: '800', textAlign: 'center' },
-  renewBtn: { padding: 16, borderRadius: 14, alignItems: 'center', marginTop: 8 },
-  renewBtnText: { color: '#fff', fontWeight: '600' },
+  renewBtn: { padding: 17, borderRadius: radii.md, alignItems: 'center', marginTop: 8 },
+  renewBtnText: { color: '#fff', fontWeight: '700' },
 });

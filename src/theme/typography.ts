@@ -7,8 +7,8 @@ export const fontScales = {
 export type FontScaleKey = keyof typeof fontScales;
 
 export const baseSizes = {
-  body: 15,
-  title: 20,
-  caption: 12,
-  button: 15,
+  body: 16,
+  title: 23,
+  caption: 13,
+  button: 17,
 };

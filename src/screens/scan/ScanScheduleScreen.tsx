@@ -1,13 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-  Platform,
-  Alert,
-} from 'react-native';
+import { View, StyleSheet, TouchableOpacity, ScrollView, Platform, Alert } from 'react-native';
+import { Text } from '../../components/ui/AppText';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useNavigation } from '@react-navigation/native';
@@ -16,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import { useFontScale } from '../../context/FontScaleContext';
 import { baseSizes } from '../../theme/typography';
+import { radii, cardShadow } from '../../theme/layout';
 import { useScanFlowStore } from '../../store/scanFlowStore';
 import { calculateCourse } from '../../services/scheduleEngine';
 import type { Frequency } from '../../services/scheduleEngine';
@@ -221,7 +215,7 @@ export default function ScanScheduleScreen() {
               <TouchableOpacity
                 key={n}
                 style={[s.optionBtn, {
-                  borderColor: active ? colors.accent : colors.border,
+                  borderColor: active ? colors.accent : 'transparent',
                   backgroundColor: active ? colors.accentLight : colors.cardAlt,
                   flex: 1,
                 }]}
@@ -239,7 +233,7 @@ export default function ScanScheduleScreen() {
         <Text style={[s.sectionLabel, { color: colors.textSecondary, fontSize: baseSizes.caption * scale }]}>
           {t('schedule_time_label')}
         </Text>
-        <View style={[s.card, { backgroundColor: colors.cardAlt, borderColor: colors.border }]}>
+        <View style={[s.card, { backgroundColor: colors.cardBg, shadowColor: colors.textPrimary }]}>
           {currentTimes.map((time, i) => (
             <TouchableOpacity
               key={i}
@@ -276,7 +270,7 @@ export default function ScanScheduleScreen() {
               <TouchableOpacity
                 key={value}
                 style={[s.optionBtn, {
-                  borderColor: active ? colors.accent : colors.border,
+                  borderColor: active ? colors.accent : 'transparent',
                   backgroundColor: active ? colors.accentLight : colors.cardAlt,
                   flex: 1,
                 }]}
@@ -292,7 +286,7 @@ export default function ScanScheduleScreen() {
 
         {/* Дни недели */}
         {frequency === 'custom_days' && (
-          <View style={[s.card, { backgroundColor: colors.cardAlt, borderColor: colors.border }]}>
+          <View style={[s.card, { backgroundColor: colors.cardBg, shadowColor: colors.textPrimary }]}>
             <Text style={[s.sectionLabel, { color: colors.textSecondary, fontSize: baseSizes.caption * scale, marginBottom: 12 }]}>
               {t('schedule_days_label')}
             </Text>
@@ -304,7 +298,7 @@ export default function ScanScheduleScreen() {
                     key={value}
                     style={[s.dayBtn, {
                       backgroundColor: active ? colors.accent : colors.bg,
-                      borderColor: active ? colors.accent : colors.border,
+                      borderColor: active ? colors.accent : 'transparent',
                     }]}
                     onPress={() => toggleDay(value)}
                   >
@@ -354,11 +348,11 @@ const s = StyleSheet.create({
   root: { flex: 1 },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16 },
   title: { fontWeight: '700' },
-  scroll: { padding: 16, gap: 14 },
-  sectionLabel: { fontWeight: '600', letterSpacing: 0.5 },
-  optionRow: { flexDirection: 'row', gap: 8 },
-  optionBtn: { paddingVertical: 12, paddingHorizontal: 8, borderRadius: 12, borderWidth: 1.5, alignItems: 'center' },
-  card: { borderRadius: 16, borderWidth: 1, padding: 14 },
+  scroll: { padding: 20, gap: 16 },
+  sectionLabel: { fontWeight: '700', letterSpacing: 0.5 },
+  optionRow: { flexDirection: 'row', gap: 10 },
+  optionBtn: { paddingVertical: 13, paddingHorizontal: 8, borderRadius: radii.sm, borderWidth: 2, alignItems: 'center' },
+  card: { borderRadius: radii.lg, padding: 16, ...cardShadow },
   timeRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -375,14 +369,14 @@ const s = StyleSheet.create({
     justifyContent: 'center',
   },
   preview: {
-    borderRadius: 16,
+    borderRadius: radii.lg,
     borderWidth: 1,
-    padding: 16,
+    padding: 18,
     alignItems: 'center',
     gap: 4,
   },
-  previewLabel: { fontWeight: '600', letterSpacing: 0.5 },
+  previewLabel: { fontWeight: '700', letterSpacing: 0.5 },
   previewDays: { fontWeight: '800' },
-  saveBtn: { padding: 16, borderRadius: 14, alignItems: 'center' },
+  saveBtn: { padding: 17, borderRadius: radii.md, alignItems: 'center' },
   saveBtnText: { color: '#fff', fontWeight: '600' },
 });

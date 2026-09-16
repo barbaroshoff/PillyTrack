@@ -1,13 +1,6 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  TextInput,
-  ScrollView,
-  Image,
-} from 'react-native';
+import { View, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image } from 'react-native';
+import { Text } from '../../components/ui/AppText';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
@@ -17,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import { useFontScale } from '../../context/FontScaleContext';
 import { baseSizes } from '../../theme/typography';
+import { radii } from '../../theme/layout';
 import { useScanFlowStore } from '../../store/scanFlowStore';
 import type { ScanFlowParamList } from '../../navigation/ScanFlowNavigator';
 
@@ -180,8 +174,8 @@ const s = StyleSheet.create({
   scroll: { padding: 16, gap: 12 },
   photoBox: {
     height: 160,
-    borderRadius: 16,
-    borderWidth: 1,
+    borderRadius: radii.lg,
+    borderWidth: 1.5,
     borderStyle: 'dashed',
     alignItems: 'center',
     justifyContent: 'center',
@@ -189,11 +183,11 @@ const s = StyleSheet.create({
     overflow: 'hidden',
   },
   photo: { width: '100%', height: '100%' },
-  label: { fontWeight: '600', letterSpacing: 0.5, marginBottom: 4 },
+  label: { fontWeight: '700', letterSpacing: 0.5, marginBottom: 6 },
   input: {
     borderWidth: 1,
-    borderRadius: 12,
-    padding: 14,
+    borderRadius: radii.sm,
+    padding: 15,
     marginBottom: 8,
   },
   stepper: {
@@ -214,8 +208,8 @@ const s = StyleSheet.create({
   stepValue: { width: 80, fontWeight: '700', textAlign: 'center' },
   nextBtn: {
     marginTop: 16,
-    padding: 16,
-    borderRadius: 14,
+    padding: 17,
+    borderRadius: radii.md,
     alignItems: 'center',
   },
   nextText: { color: '#fff', fontWeight: '600' },

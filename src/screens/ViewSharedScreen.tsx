@@ -1,20 +1,13 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  TextInput,
-  ScrollView,
-  ActivityIndicator,
-  Alert,
-} from 'react-native';
+import { View, StyleSheet, TouchableOpacity, TextInput, ScrollView, ActivityIndicator, Alert } from 'react-native';
+import { Text } from '../components/ui/AppText';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 import { useFontScale } from '../context/FontScaleContext';
 import { baseSizes } from '../theme/typography';
+import { radii, cardShadow } from '../theme/layout';
 import { fetchSharedData } from '../services/shareSync';
 import type { ShareSnapshot, SharedCourse } from '../services/shareSync';
 
@@ -127,7 +120,7 @@ function SharedCourseCard({
   const recent = course.recentIntakes.slice(0, 5);
 
   return (
-    <View style={[s.card, { backgroundColor: colors.cardAlt, borderColor: colors.border }]}>
+    <View style={[s.card, { backgroundColor: colors.cardBg, shadowColor: colors.textPrimary }]}>
       <Text style={{ color: colors.textPrimary, fontWeight: '700', fontSize: baseSizes.body * scale }}>
         💊 {course.medicationName}
       </Text>
@@ -199,18 +192,18 @@ const s = StyleSheet.create({
     padding: 16,
   },
   title: { fontWeight: '700' },
-  scroll: { padding: 20, gap: 14, paddingBottom: 40 },
+  scroll: { padding: 20, gap: 16, paddingBottom: 40 },
   input: {
     borderWidth: 1,
-    borderRadius: 14,
-    padding: 16,
+    borderRadius: radii.md,
+    padding: 17,
     textAlign: 'center',
     fontWeight: '700',
     letterSpacing: 2,
   },
-  btn: { padding: 16, borderRadius: 14, alignItems: 'center' },
+  btn: { padding: 17, borderRadius: radii.md, alignItems: 'center' },
   btnText: { color: '#fff', fontWeight: '700' },
-  card: { borderRadius: 16, borderWidth: 1, padding: 14 },
+  card: { borderRadius: radii.lg, padding: 16, ...cardShadow },
   barBg: { height: 6, borderRadius: 3, overflow: 'hidden', marginTop: 8, marginBottom: 4 },
   barFill: { height: '100%', borderRadius: 3 },
   historyRow: {
